@@ -61,6 +61,17 @@ $docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor();
 
 echo 'Documentor created' . "\n";
 
+
+$log = '';
+if ($options['init']){
+    $log .= $docuMentor->initDocumentation($cwd . '/docs', $options['force']);
+}
+if ($options['config']){
+    $log .= $docuMentor->collectDirectiveConfigs($cwd . '/src/Config');
+}
+echo $log;
+
+
 //$docuMentor->initDocumentation();
 //echo 'Documentation initialised' . "\n";
 
@@ -72,7 +83,7 @@ echo 'Documentor created' . "\n";
 function getHelpText()
 {
     return <<<HELP
-Docu-mentor - Objective-php\'s doc generator 
+Docu-mentor - Objective-php's doc generator 
 
 Usage: docu [OPTIONS] 
 

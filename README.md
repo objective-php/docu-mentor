@@ -1,4 +1,4 @@
-# ObjectivePHP\DocuMentor [![Build Status](https://secure.travis-ci.org/objective-php/primitives.png?branch=master)](http://travis-ci.org/objective-php/primitives)
+# ObjectivePHP \ DocuMentor
 ## Disclaimer
 
 This document is written in globish, the flavour of English we're trying to use in France. We know how bad our english is, please don't pay too much attention to it :)

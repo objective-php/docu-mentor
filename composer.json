@@ -28,5 +28,5 @@
       "ObjectivePHP\\DocuMentor\\": "src/"
     }
   },
-  "bin": ["bin/docu-init", "bin/docu-config"]
+  "bin": ["bin/docu"]
 }
