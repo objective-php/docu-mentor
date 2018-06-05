@@ -19,9 +19,36 @@ We tried to write documentation in many ways but we choose to write a tool to ge
  composer require --dev objective-php/docu-mentor:dev-master 
  ```
 
-
 ## Configuration directive documentation guide
 
 [Here](Doc-guide.md)
 
+## Usage
+
+Docu-mentor - Objective-php's doc generator 
+
+Usage: docu [OPTIONS] 
+
+    -i, --init    Generate the docs/.md files 
+    -c, --configs Generate or update the config-directive doc file
+    -v, --verbose Shows the errors
+    -f, --force   Overwrite the docs
+    -h, --help    Show this message
+ 
+Examples:
+
+    Init the whole documentation:
+
+        docu -ic
+
+    Rewrite the config doc:
+
+        docu -c 
+    
+    Reset the docs:
+
+        docu -i --force 
+ 
+
+Full documentation can be found at http://objective-php.org/
 
