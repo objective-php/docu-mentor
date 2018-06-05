@@ -1,0 +1,134 @@
+#!/usr/bin/env php
+<?php
+ini_set('display_errors', 'stderr');
+
+$availableOptions = ['i', 'c', 'h', 'u', 'v'];
+
+$options = [
+    'force'  => true,
+    'init'   => true,
+    'config' => true,
+];
+
+foreach ($argv as $i => $arg) {
+    if ($i === 0 || $i === '-') {
+        continue;
+    } elseif ($arg[0] === '-') {
+        switch ($arg) {
+            case '-h':
+            case '--help':
+            case '-u':
+            case '--usage':
+                echo getHelpText();
+                exit(0);
+            case '-v':
+            case '--version':
+                echo \ObjectivePHP\DocuMentor\DocuMentor::VERSION . "\n";
+                exit(0);
+            case '-i':
+            case '--init':
+                $options['init'] = true;
+                break;
+            case '-c':
+            case '--config':
+                $options['config'] = true;
+                break;
+            case '--force':
+                $options['force'] = true;
+                break;
+            default:
+                foreach (str_split($arg) as $char) {
+                    if (in_array($char, $availableOptions, true)) {
+                        $argv[] = '-' . $char;
+                    } else {
+                        fail('Unknown option: ' . $arg);
+                    }
+                }
+        }
+    } else {
+        fail(getHelpText());
+    }
+}
+
+echo 'Script starting' . "\n";
+requireAutoloader();
+
+echo 'Autoloader required' . "\n";
+$cwd = getcwd();
+
+echo 'The cwd is : ' . $cwd . "\n";
+$docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor();
+
+echo 'Documentor created' . "\n";
+
+//$docuMentor->initDocumentation();
+//echo 'Documentation initialised' . "\n";
+
+/**
+ * Get help and usage info
+ *
+ * @return string
+ */
+function getHelpText()
+{
+    return <<<HELP
+Docu-mentor - Objective-php\'s doc generator 
+
+Usage: docu [OPTIONS] 
+
+    -i, --init    Generate the docs/.md files 
+ 
+    -c, --configs Generate or update the config-directive doc file
+
+    -v, --version Shows the currently installed version
+
+    -f, --force   Overwrite the files
+
+    -h, --help    Show this message
+ 
+
+Examples:
+
+    Init a documentation:
+
+        docu -i
+
+    Init the whole documentation:
+
+        docu -ic
+
+    Rewrite the config doc:
+
+        docu -c --force
+
+ 
+
+Full documentation can be found at http://objective-php.org/
+
+HELP;
+}
+
+/**
+ * @param string $message Error message
+ */
+function fail($message)
+{
+    fwrite(STDERR, $message . "\n");
+    exit(1);
+}
+
+function requireAutoloader()
+{
+    $autoloadPaths = [
+        // Local package usage
+        __DIR__ . '/../vendor/autoload.php',
+        // Package was included as a library
+        __DIR__ . '/../../../autoload.php',
+    ];
+    foreach ($autoloadPaths as $path) {
+        if (file_exists($path)) {
+            require_once $path;
+            break;
+        }
+    }
+}

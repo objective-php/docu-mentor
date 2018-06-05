@@ -1,0 +1,5 @@
+.idea/
+vendor/
+src/Config/
+docs/
+src/index.php
