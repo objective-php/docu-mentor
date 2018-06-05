@@ -36,6 +36,10 @@ foreach ($argv as $i => $arg) {
     }
 }
 
+if (empty($args)) {
+    $args[] = 'i';
+}
+
 foreach ($args as $arg) {
     switch ($arg) {
         case 'h':
@@ -56,6 +60,7 @@ foreach ($args as $arg) {
         case 'config':
             $options['config'] = true;
             break;
+        case 'f':
         case 'force':
             $options['force'] = true;
             break;
@@ -63,32 +68,25 @@ foreach ($args as $arg) {
             fail('Argument unkwown : ' . $arg);
     }
 }
-echo 'Script starting' . "\n\n";
 requireAutoloader();
-
-echo 'Autoloader required' . "\n\n";
 $cwd = getcwd();
-
-echo 'The cwd is : ' . $cwd . "\n\n";
 $docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor();
 
-echo 'Documentor created' . "\n\n";
-
 if ($options['init']) {
-    if ( $docuMentor->initDocumentation($cwd . '/docs', $options['force'])){
+    if ($docuMentor->initDocumentation($cwd . '/docs', $options['force'])) {
         echo "\n\e[32mSUCCESS:\e[0m Documentation initialised\n\n";
         echo '
-    docs/  01.quick-start.md
-        02.detailed-usage.md
-        03.config-directives.md 
-        index.md  
+    docs/   01.quick-start.md
+            02.detailed-usage.md
+            03.config-directives.md 
+            index.md  
 ';
     } else {
         echo "\n\e[31mERROR:\e[0m Documentation initialisation aborted\n\n";
     }
 }
 if ($options['config']) {
-    if ( $docuMentor->collectDirectiveConfigs($cwd . '/src/Config', $cwd . '/docs')){
+    if ($docuMentor->collectDirectiveConfigs($cwd . '/src/Config', $cwd . '/docs')) {
         echo "\n\e[32mSUCCESS:\e[0m Config documentation generated\n\n";
     } else {
         echo "\n\e[31mERROR:\e[0m Config documentation aborted\n\n";
@@ -115,21 +113,12 @@ Docu-mentor - Objective-php's doc generator
 Usage: docu [OPTIONS] 
 
     -i, --init    Generate the docs/.md files 
- 
     -c, --configs Generate or update the config-directive doc file
-
     -v, --verbose Shows the errors
-
-    -f, --force   Overwrite the files
-
+    -f, --force   Overwrite the docs
     -h, --help    Show this message
  
-
 Examples:
-
-    Init a documentation:
-
-        docu -i
 
     Init the whole documentation:
 
@@ -137,8 +126,11 @@ Examples:
 
     Rewrite the config doc:
 
-        docu -c --force
+        docu -c 
+    
+    Reset the docs:
 
+        docu -i --force 
  
 
 Full documentation can be found at http://objective-php.org/
