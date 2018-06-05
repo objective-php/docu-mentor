@@ -31,22 +31,13 @@ class ConfigIndex extends BaseTag implements StaticMethod
     {
         $this->exampleIndex = $exampleIndex;
     }
+
     /**
      * {@inheritdoc}
      */
     public static function create($body, TypeResolver $typeResolver = null, DescriptionFactory $descFactory = null, TypeContext $context = null)
     {
-        /*Assert::stringNotEmpty($body);
-        Assert::allNotNull([$typeResolver, $descFactory]);
-
-        $parts = preg_split('~(?:\'[^\']*\'|"[^"]*")(*SKIP)(*F)|\h+~', $body, 3, PREG_SPLIT_DELIM_CAPTURE);
-
-        $type = $typeResolver->resolve(trim($parts[0], '"\''));
-        $variableName = trim($parts[0], '"\'');
-        $defValue = trim($parts[1], '"\'');
-        $desc = trim($parts[2], '"\'');
-*/
-        $exampleIndex = trim(str_replace('"', '\'', $body),'\'');
+        $exampleIndex = trim(str_replace('"', '\'', $body), '\'');
         return new static($exampleIndex);
     }
 
@@ -67,5 +58,4 @@ class ConfigIndex extends BaseTag implements StaticMethod
     {
         return $this->exampleIndex ?: '';
     }
-
 }

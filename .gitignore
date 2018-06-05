@@ -3,3 +3,4 @@ vendor/
 src/Config/
 docs/
 src/index.php
+!/src/docs/

@@ -10,19 +10,18 @@ use ObjectivePHP\DocuMentor\Exception\TagSyntaxException;
 use ObjectivePHP\DocuMentor\Tags\ConfigAttribute;
 use ObjectivePHP\DocuMentor\Tags\ConfigExampleValue;
 use ObjectivePHP\DocuMentor\Tags\ConfigIndex;
+use ObjectivePHP\Matcher\Exception;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
-use phpDocumentor\Reflection\Types\String_;
 use Symfony\Component\Finder\Finder;
 
 class DocuMentor
 {
+
     /**
-     * The currently-installed version.
-     *
-     * This might be a typical `x.y.z` version, or `x.y-dev`.
+     * @var Exception[]
      */
-    const VERSION = '0.1.0';
+    protected $report = [];
 
     /**
      * @var string
@@ -48,72 +47,81 @@ class DocuMentor
 
     /**
      * @param String $configDirectory
-     * @return array|DirectiveConfig[]
-     * @throws \Exception
+     * @param String $docsDirectory
+     * @return bool
      */
-    public function collectDirectiveConfigs(String $configDirectory = __DIR__ . '/Config'): string
+    public function collectDirectiveConfigs(String $configDirectory = __DIR__ . '/Config', String $docsDirectory = __DIR__ . '/../docs'): bool
     {
-        $finder = new Finder();
-        $finder->files()->in($configDirectory)->name('*.php');
+        try {
+            $finder = new Finder();
+            $finder->files()->in($configDirectory)->name('*.php');
 
-        $res = "# Config directives in $this->componentName \n\n";
-        foreach ($finder as $file) {
-            $reflectionFile = new ReflectionFile($file->getRealPath());
-            $fqcn = $reflectionFile->getNamespace();
-            if (!($directiveKey = $reflectionFile->getMethod('getKey')->invoke(new $fqcn()))) {
-                throw new DirectiveStructureException('No KEY found in ' . $file->getFilename());
-            }
-            // S'il sagit bien d'une directive
-            if (\in_array(DirectiveInterface::class, $interfaces = $reflectionFile->getInterfaceNames(), true)) {
-                if (!($docBlock = $reflectionFile->getDocComment())) {
-                    $docBlock = '/***/';
-                }
-                $classDocBlock = $this->docBlockFactory->create($docBlock);
-                $tab = $exempleIndex = $valuesExample = null;
-
-                $res .= '## ' . $fqcn . "\n\n";
-                $res .= $classDocBlock->getSummary() . "\n\n\n";
-                $res .= '**KEY:** ' . $directiveKey . ' **TYPE:** ' .
-                    ($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true) ? 'Multi ' : '') .
-                    (\in_array(ComplexDirectiveInterface::class, $interfaces, true) ? 'Complex ' : 'Scalar ') .
-                    " \n\n";
-                $res .= $classDocBlock->getDescription()->render() . "\n\n";
-
-                foreach ($reflectionFile->getProperties() as $property) {
-                    $reflectionProperty = $reflectionFile->getProperty($propertyName = $property->name);
-
-                    if ($docComment = $reflectionProperty->getDocComment()) {
-                        $docBlock = $this->docBlockFactory->create($docComment);
-                        if ($docBlock->hasTag('config-index')) {
-                            $exempleIndex = $docBlock->getTagsByName('config-index')[0]->getExampleIndex();
-                            if ($docBlock->getTagsByName('config-example-value')) {
-                                $valuesExample = $this->getExample($docBlock, $reflectionProperty, $fqcn);
-                            }
-                        } elseif ($docBlock->hasTag('config-attribute')) {
-                            isset($tab) ?: $tab = 'Property | Type | Example value | Summary | Description' . "\n" . '--- | --- | --- | --- | ---' . "\n";
-                            $tab .= $propertyName . '|' . $this->getPropertyType($docBlock) . '|' . json_encode($this->getExample($docBlock, $reflectionProperty, $fqcn), JSON_UNESCAPED_SLASHES) . '|' . $docBlock->getSummary() . '|' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . "\n";
-                            $valuesExample[$propertyName] = $this->getExample($docBlock, $reflectionProperty, $fqcn);
+            $res = "# Config directives in $this->componentName \n\n";
+            foreach ($finder as $file) {
+                try {
+                    $reflectionFile = new ReflectionFile($file->getRealPath());
+                    $fqcn = $reflectionFile->getNamespace();
+                    if (!($directiveKey = $reflectionFile->getMethod('getKey')->invoke(new $fqcn()))) {
+                        throw new DirectiveStructureException('No KEY found in ' . $file->getFilename());
+                    }
+                    // S'il sagit bien d'une directive
+                    if (\in_array(DirectiveInterface::class, $interfaces = $reflectionFile->getInterfaceNames(), true)) {
+                        if (!($docBlock = $reflectionFile->getDocComment())) {
+                            $docBlock = '/***/';
                         }
-                    } else {
-                        throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
-                    }
-                }
-                /*} else {
-                    throw new \DirectiveTypeException('The directive doesn\'t implement a scalar or complex interface');
-                }*/
-                $res .= $tab;
-                if ($isMulti) {
-                    if ($exempleIndex) {
-                        $valuesExample = [$exempleIndex => $valuesExample];
-                    } else {
-                        throw new DirectiveStructureException('You didn\'t overload the $reference or didn\'t comment it correctly in ' . $reflectionFile->getFileName());
-                    }
-                }
+                        $classDocBlock = $this->docBlockFactory->create($docBlock);
+                        $tab = $exempleIndex = $valuesExample = null;
 
-                $res .= "\n```json  \n" . json_encode([$directiveKey => $valuesExample], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n```\n";
+                        $res .= '## ' . $fqcn . "\n\n";
+                        $res .= $classDocBlock->getSummary() . "\n\n\n";
+                        $res .= '**KEY:** ' . $directiveKey . ' **TYPE:** ' .
+                            ($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true) ? 'Multi ' : '') .
+                            (\in_array(ComplexDirectiveInterface::class, $interfaces, true) ? 'Complex ' : 'Scalar ') .
+                            " \n\n";
+                        $res .= $classDocBlock->getDescription()->render() . "\n\n";
+
+                        foreach ($reflectionFile->getProperties() as $property) {
+                            try {
+                                $reflectionProperty = $reflectionFile->getProperty($propertyName = $property->name);
+                                if ($docComment = $reflectionProperty->getDocComment()) {
+                                    $docBlock = $this->docBlockFactory->create($docComment);
+                                    if ($docBlock->hasTag('config-index')) {
+                                        $exempleIndex = $docBlock->getTagsByName('config-index')[0]->getExampleIndex();
+                                        if ($docBlock->getTagsByName('config-example-value')) {
+                                            $valuesExample = $this->getExample($docBlock, $reflectionProperty, $fqcn);
+                                        }
+                                    } elseif ($docBlock->hasTag('config-attribute')) {
+                                        isset($tab) ?: $tab = 'Property | Type | Example value | Summary | Description' . "\n" . '--- | --- | --- | --- | ---' . "\n";
+                                        $tab .= $propertyName . '|' . $this->getPropertyType($docBlock) . '|' . json_encode($this->getExample($docBlock, $reflectionProperty, $fqcn), JSON_UNESCAPED_SLASHES) . '|' . $docBlock->getSummary() . '|' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . "\n";
+                                        $valuesExample[$propertyName] = $this->getExample($docBlock, $reflectionProperty, $fqcn);
+                                    }
+                                } else {
+                                    throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
+                                }
+                            } catch (\Exception $exception) {
+                                $this->report[] = $exception;
+                            }
+                        }
+                        $res .= $tab;
+                        if ($isMulti) {
+                            if ($exempleIndex) {
+                                $valuesExample = [$exempleIndex => $valuesExample];
+                            } else {
+                                throw new DirectiveStructureException('You didn\'t overload the $reference or didn\'t comment it correctly in ' . $reflectionFile->getFileName());
+                            }
+                        }
+                        $res .= "\n```json  \n" . json_encode([$directiveKey => $valuesExample], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n```\n";
+                    }
+                } catch (\Exception $exception) {
+                    $this->report[] = $exception;
+                }
             }
+            file_put_contents($docsDirectory . '/03.config-directives.md', $res);
+            return true;
+        } catch (\Exception $exception) {
+            $this->report[] = $exception;
+            return false;
         }
-        return $res;
     }
 
 
@@ -150,17 +158,14 @@ class DocuMentor
                 foreach ($tags as $tag) {
                     $body .= $tag->getExampleValue();
                 }
-                //Gerer les boolean
-                if ($body === 'true' || $body === 'false') {
+
+                if ($body === 'true' || $body === 'false') {        //Gerer les boolean
                     $example = $body === 'true';
-                } //Gerer les tableaux
-                elseif (0 === strpos($body, 'array(')) {
+                } elseif (0 === strpos($body, 'array(')) {  //Gerer les tableaux
                     $example = eval('return ' . $body . ';');
-                } //Gerer objet JSON
-                elseif (0 === strpos($body, '{')) {
+                } elseif (0 === strpos($body, '{')) {       //Gerer objet JSON
                     $example = json_decode($body, true);
-                } //Gerer string
-                else {
+                } else {                                            //Gerer string
                     $example = trim($body, '\'"');
                 }
             } else {
@@ -174,29 +179,34 @@ class DocuMentor
         return $example;
     }
 
-
-    public function initDocumentation(String $docsDirectory = __DIR__ . '/../docs', $force = false): void
+    /**
+     * @param String $docsDirectory
+     * @param bool   $force
+     * @return bool
+     */
+    public function initDocumentation(String $docsDirectory = __DIR__ . '/../docs', $force = false): bool
     {
-        $finder = new Finder();
-        $finder->files()->in(__DIR__ . '/docs')->name('*.md');
+        try {
+            $finder = new Finder();
+            $finder->files()->in(__DIR__ . '/docs')->name('*.md');
 
-        if (\is_dir($docsDirectory) && !$force) {
-            throw new \Exception('You already have a docs folder');
-        } else {
-            if (!is_dir($docsDirectory) && !mkdir($docsDirectory, 0755, true) && !is_dir($docsDirectory)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $docsDirectory));
-            }
-            foreach ($finder as $file) {
-                if ($file->getFilename() === '03.config-directives.md') {
-                    $content = $this->collectDirectiveConfigs();
-                } else {
-                    $content = str_replace('{{REPO-NAME}}', $this->componentName, $file->getContents());
+            if (\is_dir($docsDirectory) && !$force) {
+                throw new \Exception('You already have a docs folder');
+            } else {
+                if (!is_dir($docsDirectory) && !mkdir($docsDirectory, 0755, true) && !is_dir($docsDirectory)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $docsDirectory));
                 }
-                file_put_contents($docsDirectory . '/' . $file->getFilename(), $content);
+                foreach ($finder as $file) {
+                    $content = str_replace('{{REPO-NAME}}', $this->componentName, $file->getContents());
+                    file_put_contents($docsDirectory . '/' . $file->getFilename(), $content);
+                }
             }
+        } catch (\Exception $exception) {
+            $this->report[] = $exception;
+            return false;
         }
+        return true;
     }
-
 
     /**
      * @return string
@@ -204,5 +214,13 @@ class DocuMentor
     public function getComponentName(): string
     {
         return $this->componentName;
+    }
+
+    /**
+     * @return array
+     */
+    public function getReport(): array
+    {
+        return $this->report;
     }
 }

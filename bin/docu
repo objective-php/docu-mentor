@@ -1,79 +1,106 @@
 #!/usr/bin/env php
 <?php
-ini_set('display_errors', 'stderr');
-
-$availableOptions = ['i', 'c', 'h', 'u', 'v'];
 
 $options = [
-    'force'  => true,
-    'init'   => true,
-    'config' => true,
+    'force'   => false,
+    'init'    => false,
+    'config'  => false,
+    'verbose' => false,
 ];
 
+$args = [];
+
 foreach ($argv as $i => $arg) {
-    if ($i === 0 || $i === '-') {
+    if ($i === 0) {
         continue;
-    } elseif ($arg[0] === '-') {
-        switch ($arg) {
-            case '-h':
-            case '--help':
-            case '-u':
-            case '--usage':
-                echo getHelpText();
-                exit(0);
-            case '-v':
-            case '--version':
-                echo \ObjectivePHP\DocuMentor\DocuMentor::VERSION . "\n";
-                exit(0);
-            case '-i':
-            case '--init':
-                $options['init'] = true;
-                break;
-            case '-c':
-            case '--config':
-                $options['config'] = true;
-                break;
-            case '--force':
-                $options['force'] = true;
-                break;
-            default:
-                foreach (str_split($arg) as $char) {
-                    if (in_array($char, $availableOptions, true)) {
-                        $argv[] = '-' . $char;
-                    } else {
-                        fail('Unknown option: ' . $arg);
-                    }
-                }
-        }
     } else {
-        fail(getHelpText());
+        if (preg_match('/^(-+)([a-z]+)$/', $arg, $match)) {
+            //$match[0];  -iv --config
+            //$match[1];  -   --
+            //$match[2];  iv  config
+            switch ($match[1]) {
+                case '--':
+                    $args[] = $match[2];
+                    break;
+                case '-':
+                    foreach (str_split($match[2]) as $char) {
+                        $args[] = $char;
+                    }
+                    break;
+                default:
+                    fail('Argument badly writted : ' . $arg);
+            }
+        } else {
+            fail('Argument badly writted : ' . $arg);
+        }
     }
 }
 
-echo 'Script starting' . "\n";
+foreach ($args as $arg) {
+    switch ($arg) {
+        case 'h':
+        case 'help':
+        case 'u':
+        case 'usage':
+            echo getHelpText();
+            exit(0);
+        case 'v':
+        case 'verbose':
+            $options['verbose'] = true;
+            break;
+        case 'i':
+        case 'init':
+            $options['init'] = true;
+            break;
+        case 'c':
+        case 'config':
+            $options['config'] = true;
+            break;
+        case 'force':
+            $options['force'] = true;
+            break;
+        default:
+            fail('Argument unkwown : ' . $arg);
+    }
+}
+echo 'Script starting' . "\n\n";
 requireAutoloader();
 
-echo 'Autoloader required' . "\n";
+echo 'Autoloader required' . "\n\n";
 $cwd = getcwd();
 
-echo 'The cwd is : ' . $cwd . "\n";
+echo 'The cwd is : ' . $cwd . "\n\n";
 $docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor();
 
-echo 'Documentor created' . "\n";
+echo 'Documentor created' . "\n\n";
 
-
-$log = '';
-if ($options['init']){
-    $log .= $docuMentor->initDocumentation($cwd . '/docs', $options['force']);
+if ($options['init']) {
+    if ( $docuMentor->initDocumentation($cwd . '/docs', $options['force'])){
+        echo "\n\e[32mSUCCESS:\e[0m Documentation initialised\n\n";
+        echo '
+    docs/  01.quick-start.md
+        02.detailed-usage.md
+        03.config-directives.md 
+        index.md  
+';
+    } else {
+        echo "\n\e[31mERROR:\e[0m Documentation initialisation aborted\n\n";
+    }
 }
-if ($options['config']){
-    $log .= $docuMentor->collectDirectiveConfigs($cwd . '/src/Config');
+if ($options['config']) {
+    if ( $docuMentor->collectDirectiveConfigs($cwd . '/src/Config', $cwd . '/docs')){
+        echo "\n\e[32mSUCCESS:\e[0m Config documentation generated\n\n";
+    } else {
+        echo "\n\e[31mERROR:\e[0m Config documentation aborted\n\n";
+    }
 }
-echo $log;
 
-
-//$docuMentor->initDocumentation();
-//echo 'Documentation initialised' . "\n";
+if ($options['verbose']) {
+    foreach ($docuMentor->getReport() as $exception) {
+        echo "\n\e[31m ERROR: \e[0m";
+        echo $exception->getMessage();
+    }
+}
 
 /**
  * Get help and usage info
@@ -82,7 +109,7 @@ echo $log;
  */
 function getHelpText()
 {
-    return <<<HELP
+    return "
 Docu-mentor - Objective-php's doc generator 
 
 Usage: docu [OPTIONS] 
@@ -91,7 +118,7 @@ Usage: docu [OPTIONS]
  
     -c, --configs Generate or update the config-directive doc file
 
-    -v, --version Shows the currently installed version
+    -v, --verbose Shows the errors
 
     -f, --force   Overwrite the files
 
@@ -115,8 +142,7 @@ Examples:
  
 
 Full documentation can be found at http://objective-php.org/
-
-HELP;
+";
 }
 
 /**
@@ -124,7 +150,7 @@ HELP;
  */
 function fail($message)
 {
-    fwrite(STDERR, $message . "\n");
+    fwrite(STDERR, "\033[31m ERROR: \033[0m $message  \n\n Use: \ndocu --help      to find help \n");
     exit(1);
 }
 
