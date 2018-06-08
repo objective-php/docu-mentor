@@ -40,24 +40,25 @@ php docu [OPTIONS]
  
 ### Examples:
 Init the whole documentation:
-``` php
+``` bash
     php docu -ic
 ```
 Rewrite the config doc:
-``` php
+``` bash
     php docu -c -v
 ```     
 Rewrite and debug your config:
-``` php
+``` bash
     php docu -c -vvv
 ```
 Reset the docs:
-``` php
+``` bash
     php docu -i --force 
 ```        
 Custom pathes:
-``` php
+``` bash
     php docu -ic --config-dir=./docs/ --docs-dir=./Config  
 ```
+
 ## The whole documentation
 Full documentation can be found at [objective-php.org](http://objective-php.org/)
