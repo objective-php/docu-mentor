@@ -1,11 +1,23 @@
 #!/usr/bin/env php
 <?php
 
+if (file_exists($path = __DIR__ . '/../vendor/autoload.php')) {
+    require_once $path;
+}
+if (file_exists($path = __DIR__ . '/../../../autoload.php')) {
+    require_once $path;
+}
+
+$cwd = getcwd();
+$separator = "\n" . str_repeat('-', exec('tput cols'));
+
 $options = [
-    'force'   => false,
-    'init'    => false,
-    'config'  => false,
-    'verbose' => false,
+    'force'       => 0,
+    'init'        => 0,
+    'config'      => 0,
+    'verbose'     => 0,
+    'configs-dir' => __DIR__ . '/../../../../src/Config',
+    'docs-dir'    => __DIR__ . '/../../../../docs',
 ];
 
 $args = [];
@@ -14,13 +26,14 @@ foreach ($argv as $i => $arg) {
     if ($i === 0) {
         continue;
     } else {
-        if (preg_match('/^(-+)([a-z]+)$/', $arg, $match)) {
-            //$match[0];  -iv --config
-            //$match[1];  -   --
-            //$match[2];  iv  config
+        if (preg_match('/^(-+)([a-z-]+)=?(.*)?$/', $arg, $match)) {
+            //$match[0];  -iv  --config --docs-dir=/var/here
+            //$match[1];  -    --       --
+            //$match[2];  iv   config   docs
+            //$match[3];  null null     /var/here
             switch ($match[1]) {
                 case '--':
-                    $args[] = $match[2];
+                    $args[$match[3]] = $match[2];
                     break;
                 case '-':
                     foreach (str_split($match[2]) as $char) {
@@ -40,7 +53,7 @@ if (empty($args)) {
     $args[] = 'i';
 }
 
-foreach ($args as $arg) {
+foreach ($args as $i => $arg) {
     switch ($arg) {
         case 'h':
         case 'help':
@@ -50,87 +63,135 @@ foreach ($args as $arg) {
             exit(0);
         case 'v':
         case 'verbose':
-            $options['verbose'] = true;
+            $options['verbose']++;
             break;
         case 'i':
         case 'init':
-            $options['init'] = true;
+            $options['init']++;
             break;
         case 'c':
         case 'config':
-            $options['config'] = true;
+            $options['config']++;
             break;
         case 'f':
         case 'force':
-            $options['force'] = true;
+            $options['force']++;
+            break;
+        case 'd':
+        case 'dev':
+            $options['configs-dir'] = __DIR__ . '/../src/Config';
+            $options['docs-dir'] = __DIR__ . '/../docs';
+            break;
+        case 'docs-dir':
+            $options['docs-dir'] = $i;
+            break;
+        case 'config-dir':
+            $options['config-dir'] = $i;
             break;
         default:
             fail('Argument unkwown : ' . $arg);
     }
 }
-requireAutoloader();
-$cwd = getcwd();
+
 $docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor();
 
+//======================================================================
+// INIT
+//======================================================================
 if ($options['init']) {
-    if ($docuMentor->initDocumentation($cwd . '/docs', $options['force'])) {
-        echo "\n\e[32mSUCCESS:\e[0m Documentation initialised\n\n";
-        echo '
-    docs/   01.quick-start.md
-            02.detailed-usage.md
-            03.config-directives.md 
-            index.md  
+    echo "Documentation initialization... \n\e[91m";
+    if (!$options['force'] && is_dir($options['docs-dir'])) {
+        echo "\n\e[31m ERROR :\e[0m Documentation initialization aborted";
+        echo "\n\e[31m ERROR :\e[0m You already have a docs folder, use \e[32m--force\e[0m to overwrite \n";
+    } elseif ($docuMentor->initDocumentation($options['docs-dir'], $options['force'])) {
+        echo "\n\e[1;30;42m SUCCESS \e[0m Documentation initialized\n\n";
+        echo '/docs
+    |- 01.quick-start.md
+    |- 02.detailed-usage.md
+    |- 03.config-directives.md 
+    |- index.md  
 ';
     } else {
-        echo "\n\e[31mERROR:\e[0m Documentation initialisation aborted\n\n";
+        echo "\n\e[1;30;41m FAILURE \e[0m Documentation initialization aborted\n";
     }
 }
+
+//======================================================================
+// CONFIG
+//======================================================================
+echo "\n\e[91m";
 if ($options['config']) {
     if ($docuMentor->collectDirectiveConfigs($cwd . '/src/Config', $cwd . '/docs')) {
-        echo "\n\e[32mSUCCESS:\e[0m Config documentation generated\n\n";
+        echo "\n\e[1;30;42m SUCCESS \e[0m Config documentation generated\n";
     } else {
-        echo "\n\e[31mERROR:\e[0m Config documentation aborted\n\n";
+        echo "\n\e[1;30;41m FAILURE \e[0m Config documentation aborted\n";
     }
 }
 
+//======================================================================
+// ERRORS
+//======================================================================
 if ($options['verbose']) {
-    foreach ($docuMentor->getReport() as $exception) {
-        echo "\n\e[31m ERROR: \e[0m";
-        echo $exception->getMessage();
+    foreach ($docuMentor->getReport() as $key => $exception) {
+        echo $separator;
+        echo "\n\e[31m EXCEPTION\e[32m " . ++$key . "\e[31m : \e[0m\n";
+        echo "\e[35m  MESSAGE :\e[0m " . $exception->getMessage();
+        if ($options['verbose'] > 1) {
+            echo "\n\e[35m  LINE :\e[0m " . $exception->getLine() . " in " . $exception->getFile();
+            if ($options['verbose'] > 2) {
+                echo "\n\e[35m  TRACE :\e[0m " . $exception->getTraceAsString();
+            }
+        }
     }
 }
+if ($nbException = count($docuMentor->getReport())) {
+    echo $separator;
+    echo "\n- \e[31m $nbException\e[0m Exceptions thrown\n";
+    if (!$options['verbose']) {
+        echo "Use verbose mode to show Exceptions (-v or -vv or -vvv)\n";
+    }
+} else {
+    echo "\n- \e[32m $nbException\e[0m Exception thrown\n";
+}
 
-/**
- * Get help and usage info
- *
- * @return string
- */
+//======================================================================
+// UTILS
+//======================================================================
+
 function getHelpText()
 {
     return "
-Docu-mentor - Objective-php's doc generator 
+Docu-mentor - Objective PHP's doc generator 
 
 Usage: docu [OPTIONS] 
-
-    -i, --init    Generate the docs/.md files 
-    -c, --configs Generate or update the config-directive doc file
-    -v, --verbose Shows the errors
-    -f, --force   Overwrite the docs
-    -h, --help    Show this message
+    -i, --init      Generate the docs/.md files 
+    -c, --configs   Update the config-directive doc file
+    -v, --verbose   Shows the errors
+    -vv, -vvv       Shows the errors more expressly
+    -f, --force     Overwrite the docs
+    -h,-u, --help,--usage   
+                    Show this message
+     --config-dir=[path]
+                    Specify a custom path for the configs   
+     --docs-dir=[path]   
+                    Specify a custom path for output directory   
+                    
  
 Examples:
-
     Init the whole documentation:
-
         docu -ic
 
     Rewrite the config doc:
-
-        docu -c 
+        docu -c -v
+     
+    Rewrite and debug your config:
+        docu -c -vvv
     
     Reset the docs:
-
         docu -i --force 
+        
+    Custom pathes:
+        docu -ic --config-dir=./docs/ --docs-dir=./Config  
  
 
 Full documentation can be found at http://objective-php.org/
@@ -142,22 +203,6 @@ Full documentation can be found at http://objective-php.org/
  */
 function fail($message)
 {
-    fwrite(STDERR, "\033[31m ERROR: \033[0m $message  \n\n Use: \ndocu --help      to find help \n");
+    fwrite(STDERR, "\033[31m ERROR: \033[0m $message  \n\n Use: \ndocu --help  to find help \n");
     exit(1);
-}
-
-function requireAutoloader()
-{
-    $autoloadPaths = [
-        // Local package usage
-        __DIR__ . '/../vendor/autoload.php',
-        // Package was included as a library
-        __DIR__ . '/../../../autoload.php',
-    ];
-    foreach ($autoloadPaths as $path) {
-        if (file_exists($path)) {
-            require_once $path;
-            break;
-        }
-    }
 }

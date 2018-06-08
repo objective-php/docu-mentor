@@ -1,12 +1,7 @@
 # ObjectivePHP \ DocuMentor
-## Disclaimer
-
-This document is written in globish, the flavour of English we're trying to use in France. We know how bad our english is, please don't pay too much attention to it :)
-
-Although we're thinking to this library for a while now, its implementation is still in early stage, and for the next coming months, you'll probably see a few code and a lot of changes in it. This means that if you're interested in this project, you're more than welcome to try it, contribute to it, make proposals for it, but please don't use it in production projects for now!
 
 ## Project introduction
-We always wanted to make our framework Objective-Php serviceable for every person who get interested getting an use of it.
+We always wanted to make our framework Objective PHP serviceable for every person who get interested getting an use of it.
 We tried to write documentation in many ways but we choose to write a tool to generate a custom markdown documentation for every components.
 
  ## Installation
@@ -16,39 +11,53 @@ We tried to write documentation in many ways but we choose to write a tool to ge
  The easiest way to install the library and get ready to play with it is by using Composer. Run the following command :
 
  ```
- composer require --dev objective-php/docu-mentor:dev-master 
+ composer require objective-php/docu-mentor 
  ```
+The will be accessible in ./vendor/bin
 
 ## Configuration directive documentation guide
 
 [Here](Doc-guide.md)
 
-## Usage
+## How to use
 
-Docu-mentor - Objective-php's doc generator 
+### Usage
+```
+php docu [OPTIONS]    
 
-Usage: docu [OPTIONS] 
-
-    -i, --init    Generate the docs/.md files 
-    -c, --configs Generate or update the config-directive doc file
-    -v, --verbose Shows the errors
-    -f, --force   Overwrite the docs
-    -h, --help    Show this message
+    -i, --init      Generate the docs/.md files 
+    -c, --configs   Update the config-directive doc file
+    -v, --verbose   Shows the errors
+    -vv, -vvv       Shows the errors more expressly
+    -f, --force     Overwrite the docs
+    -h,-u, --help,--usage   
+                    Show this message
+     --config-dir=[path]
+                    Specify a custom path for the configs   
+     --docs-dir=[path]   
+                    Specify a custom path for output directory   
+ ```                 
  
-Examples:
-
-    Init the whole documentation:
-
-        docu -ic
-
-    Rewrite the config doc:
-
-        docu -c 
-    
-    Reset the docs:
-
-        docu -i --force 
- 
-
-Full documentation can be found at http://objective-php.org/
-
+### Examples:
+Init the whole documentation:
+``` php
+    php docu -ic
+```
+Rewrite the config doc:
+``` php
+    php docu -c -v
+```     
+Rewrite and debug your config:
+``` php
+    php docu -c -vvv
+```
+Reset the docs:
+``` php
+    php docu -i --force 
+```        
+Custom pathes:
+``` php
+    php docu -ic --config-dir=./docs/ --docs-dir=./Config  
+```
+## The whole documentation
+Full documentation can be found at [objective-php.org](http://objective-php.org/)

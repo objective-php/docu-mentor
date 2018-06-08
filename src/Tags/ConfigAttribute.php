@@ -52,7 +52,7 @@ class ConfigAttribute extends BaseTag implements StaticMethod
 */
         $type = null;
         if ($body) {
-            $type = $typeResolver->resolve($body);
+            $type = $typeResolver->resolve( trim($body, '\'"'));
         }
         return new static($type);
     }

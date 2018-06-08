@@ -1,32 +1,35 @@
 {
-  "name": "objective-php/docu-mentor",
-  "description": "Tool to generate Objective-php's markdown documentation",
-  "type": "library",
-  "keywords": [
-    "doc",
-    "markdown",
-    "objective php"
-  ],
-  "homepage": "https://github.com/objective-php/docu-mentor",
-  "license": "GPL-3.0",
-  "authors": [
-    {
-      "name": "Louis Cuny",
-      "email": "louis-cuny@gmx.fr",
-      "role": "Intern"
-    }
-  ],
-  "require": {
-    "php": ">=7.0",
-    "phpdocumentor/reflection-docblock": "^4.3",
-    "symfony/finder": "^4.0"
-  },
-  "require-dev": {
-  },
-  "autoload": {
-    "psr-4": {
-      "ObjectivePHP\\DocuMentor\\": "src/"
-    }
-  },
-  "bin": ["bin/docu"]
+    "name": "objective-php/docu-mentor",
+    "description": "Tool to generate Objective-php's markdown documentation",
+    "type": "library",
+    "keywords": [
+        "doc",
+        "markdown",
+        "objective php"
+    ],
+    "homepage": "https://github.com/objective-php/docu-mentor",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Louis Cuny",
+            "email": "louis-cuny@gmx.fr",
+            "role": "Intern"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "phpdocumentor/reflection-docblock": "^4.3",
+        "symfony/finder": "^4.0"
+    },
+    "require-dev": {
+        "objective-php/config": "^2.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ObjectivePHP\\DocuMentor\\": "src/"
+        }
+    },
+    "bin": [
+        "bin/docu"
+    ]
 }

@@ -116,12 +116,14 @@ class DocuMentor
                     $this->report[] = $exception;
                 }
             }
-            file_put_contents($docsDirectory . '/03.config-directives.md', $res);
-            return true;
+            if (file_put_contents($docsDirectory . '/03.config-directives.md', $res)) {
+                return true;
+            }
         } catch (\Exception $exception) {
             $this->report[] = $exception;
             return false;
         }
+        return false;
     }
 
 
@@ -190,7 +192,7 @@ class DocuMentor
             $finder = new Finder();
             $finder->files()->in(__DIR__ . '/docs')->name('*.md');
 
-            if (\is_dir($docsDirectory) && !$force) {
+            if (is_dir($docsDirectory) && !$force) {
                 throw new \Exception('You already have a docs folder');
             } else {
                 if (!is_dir($docsDirectory) && !mkdir($docsDirectory, 0755, true) && !is_dir($docsDirectory)) {
