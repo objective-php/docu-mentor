@@ -44,7 +44,8 @@ class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInt
      *
      * @config-example-value    array(
      * @config-example-value        'first_value',
-     * @config-example-value        'second_value'
+     * @config-example-value        'second_value',
+     * @config-example-value        {"f_key" : "f_val", "s_key" : "S_val"}
      * @config-example-value    )
      *
      * @var array
@@ -58,6 +59,7 @@ class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInt
      *
      * @config-example-value    {
      * @config-example-value        "user_name": "My username",
+     * @config-example-value        "competences": ["php", "js"],
      * @config-example-value        "psoeudonyme": "My psoeudo"
      * @config-example-value    }
      *

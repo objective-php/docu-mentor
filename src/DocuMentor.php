@@ -16,6 +16,10 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use Symfony\Component\Finder\Finder;
 
+/**
+ * Class DocuMentor
+ * @package ObjectivePHP\DocuMentor
+ */
 class DocuMentor
 {
 
@@ -38,6 +42,7 @@ class DocuMentor
      * @var string
      */
     protected $docsDirectory;
+
     /**
      * @var String
      */
@@ -181,29 +186,23 @@ class DocuMentor
                 foreach ($tags as $tag) {
                     $body .= $tag->getExampleValue();
                 }
-
-                if ($body === 'true' || $body === 'false') {        //Gerer les boolean
-                    $example = $body === 'true';
-                } elseif (0 === strpos($body, 'array(')) {  //Gerer les tableaux
-                    $example = eval('return ' . $body . ';');
-                } elseif (0 === strpos($body, '{')) {       //Gerer objet JSON
-                    $example = json_decode($body, true);
-                } else {                                            //Gerer string
-                    $example = trim($body, '\'"');
+                if (preg_match('/^array\(.*\)$|^{.*}$/', $body)) {
+                    $body = preg_replace(['/^(array\()/', '/(\')/', '/(\))$/'], ['[', '"', ']'], $body);
+                    if (!($res = json_decode($body, true))) {
+                        throw new TagSyntaxException("@config-example-value of\e[31m \$$reflectionProperty->name \e[0mas a bad syntax : $body\n in " . $fqcn);
+                    }
+                    return $res;
                 }
-            } else {
-                throw new TagSyntaxException('@config-example-value needs an example like this :  @config-example-value  string');
+                return trim($body, '\'"');
             }
-        } else {
-            $reflectionProperty->setAccessible(true);
-            $example = $reflectionProperty->getValue(new $fqcn);
+            throw new TagSyntaxException('@config-example-value needs an example like this :  @config-example-value  value');
         }
-
-        return $example;
+        $reflectionProperty->setAccessible(true);
+        return $reflectionProperty->getValue(new $fqcn);
     }
 
     /**
-     * @param bool   $force
+     * @param bool $force
      * @return bool
      */
     public function initDocumentation($force = false): bool
