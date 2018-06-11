@@ -34,27 +34,41 @@ class DocuMentor
     protected $docBlockFactory;
 
     /**
-     * DocuMentor constructor.
+     * @var string
      */
-    public function __construct()
+    protected $docsDirectory;
+    /**
+     * @var String
+     */
+    private $configDirectory;
+
+
+    /**
+     * DocuMentor constructor.
+     * @param String $this->>docsDirectory
+     */
+    public function __construct(String $docsDirectory = __DIR__ . '/../docs', String $configDirectory = __DIR__ . '/Config')
     {
+        if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755, true) && !is_dir($this->docsDirectory)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->docsDirectory));
+        }
         $customTags = ['config-attribute'     => ConfigAttribute::class,
                        'config-index'         => ConfigIndex::class,
                        'config-example-value' => ConfigExampleValue::class];
         $this->docBlockFactory = DocBlockFactory::createInstance($customTags);
         $this->componentName = json_decode(file_get_contents(__DIR__ . '/../composer.json'), true)['name'];
+        $this->docsDirectory = $docsDirectory;
+        $this->configDirectory = $configDirectory;
     }
 
     /**
-     * @param String $configDirectory
-     * @param String $docsDirectory
      * @return bool
      */
-    public function collectDirectiveConfigs(String $configDirectory = __DIR__ . '/Config', String $docsDirectory = __DIR__ . '/../docs'): bool
+    public function collectDirectiveConfigs(): bool
     {
         try {
             $finder = new Finder();
-            $finder->files()->in($configDirectory)->name('*.php');
+            $finder->files()->in($this->configDirectory)->name('*.php');
 
             $res = "# Config directives in $this->componentName \n\n";
             foreach ($finder as $file) {
@@ -116,7 +130,7 @@ class DocuMentor
                     $this->report[] = $exception;
                 }
             }
-            if (file_put_contents($docsDirectory . '/03.config-directives.md', $res)) {
+            if (file_put_contents($this->docsDirectory . '/03.config-directives.md', $res)) {
                 return true;
             }
         } catch (\Exception $exception) {
@@ -150,6 +164,10 @@ class DocuMentor
     }
 
     /**
+     * @param DocBlock            $docBlock
+     * @param \ReflectionProperty $reflectionProperty
+     * @param String              $fqcn
+     * @return bool|mixed|string
      * @throws TagSyntaxException
      */
     public function getExample(DocBlock $docBlock, \ReflectionProperty $reflectionProperty, String $fqcn)
@@ -182,25 +200,24 @@ class DocuMentor
     }
 
     /**
-     * @param String $docsDirectory
      * @param bool   $force
      * @return bool
      */
-    public function initDocumentation(String $docsDirectory = __DIR__ . '/../docs', $force = false): bool
+    public function initDocumentation($force = false): bool
     {
         try {
             $finder = new Finder();
             $finder->files()->in(__DIR__ . '/docs')->name('*.md');
 
-            if (is_dir($docsDirectory) && !$force) {
+            if (is_dir($this->docsDirectory) && !$force) {
                 throw new \Exception('You already have a docs folder');
             } else {
-                if (!is_dir($docsDirectory) && !mkdir($docsDirectory, 0755, true) && !is_dir($docsDirectory)) {
-                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $docsDirectory));
+                if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755, true) && !is_dir($this->docsDirectory)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->docsDirectory));
                 }
                 foreach ($finder as $file) {
                     $content = str_replace('{{REPO-NAME}}', $this->componentName, $file->getContents());
-                    file_put_contents($docsDirectory . '/' . $file->getFilename(), $content);
+                    file_put_contents($this->docsDirectory . '/' . $file->getFilename(), $content);
                 }
             }
         } catch (\Exception $exception) {

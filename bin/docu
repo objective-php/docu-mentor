@@ -93,7 +93,7 @@ foreach ($args as $i => $arg) {
     }
 }
 
-$docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor();
+$docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor($options['docs-dir'],$options['config-dir']);
 
 //======================================================================
 // INIT
@@ -103,7 +103,7 @@ if ($options['init']) {
     if (!$options['force'] && is_dir($options['docs-dir'])) {
         echo "\n\e[31m ERROR :\e[0m Documentation initialization aborted";
         echo "\n\e[31m ERROR :\e[0m You already have a docs folder, use \e[32m--force\e[0m to overwrite \n";
-    } elseif ($docuMentor->initDocumentation($options['docs-dir'], $options['force'])) {
+    } elseif ($docuMentor->initDocumentation( $options['force'])) {
         echo "\n\e[1;30;42m SUCCESS \e[0m Documentation initialized\n\n";
         echo '/docs
     |- 01.quick-start.md
@@ -121,7 +121,7 @@ if ($options['init']) {
 //======================================================================
 echo "\n\e[91m";
 if ($options['config']) {
-    if ($docuMentor->collectDirectiveConfigs($cwd . '/src/Config', $cwd . '/docs')) {
+    if ($docuMentor->collectDirectiveConfigs()) {
         echo "\n\e[1;30;42m SUCCESS \e[0m Config documentation generated\n";
     } else {
         echo "\n\e[1;30;41m FAILURE \e[0m Config documentation aborted\n";
