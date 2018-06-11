@@ -3,6 +3,7 @@
 namespace ObjectivePHP\DocuMentor\Config;
 
 use ObjectivePHP\Config\Directive\AbstractComplexDirective;
+use ObjectivePHP\Config\Directive\IgnoreDefaultInterface;
 
 /**
  * Class ExampleConfig
@@ -12,7 +13,7 @@ use ObjectivePHP\Config\Directive\AbstractComplexDirective;
  *
  * @package ObjectivePHP\DocuMentor\Config
  */
-class ExampleConfig extends AbstractComplexDirective
+class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInterface
 {
     const KEY = 'example';
 
@@ -28,22 +29,37 @@ class ExampleConfig extends AbstractComplexDirective
      *
      * @config-attribute
      *
-     * @config-example-value        array( 'first_value',
-     * @config-example-value        'second_value' )
+     * @config-example-value    array('first_value', 'second_value' )
      *
      * @var array
      */
     protected $someArray;
 
     /**
+     * Array value
+     *
+     * An example with an array on many lines
+     *
+     * @config-attribute
+     *
+     * @config-example-value    array(
+     * @config-example-value        'first_value',
+     * @config-example-value        'second_value'
+     * @config-example-value    )
+     *
+     * @var array
+     */
+    protected $altArray;
+
+    /**
      * An Object User
      *
      * @config-attribute     hash
      *
-     * @config-example-value {
-     * @config-example-value "user_name": "My username",
-     * @config-example-value "psoeudonyme": "My psoeudo"
-     * @config-example-value }
+     * @config-example-value    {
+     * @config-example-value        "user_name": "My username",
+     * @config-example-value        "psoeudonyme": "My psoeudo"
+     * @config-example-value    }
      *
      * @var User
      */

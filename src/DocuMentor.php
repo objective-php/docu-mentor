@@ -4,6 +4,7 @@ namespace ObjectivePHP\DocuMentor;
 
 use ObjectivePHP\Config\Directive\ComplexDirectiveInterface;
 use ObjectivePHP\Config\Directive\DirectiveInterface;
+use ObjectivePHP\Config\Directive\IgnoreDefaultInterface;
 use ObjectivePHP\Config\Directive\MultiValueDirectiveInterface;
 use ObjectivePHP\DocuMentor\Exception\DirectiveStructureException;
 use ObjectivePHP\DocuMentor\Exception\TagSyntaxException;
@@ -93,7 +94,7 @@ class DocuMentor
                         $res .= '**KEY:** ' . $directiveKey . ' **TYPE:** ' .
                             ($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true) ? 'Multi ' : '') .
                             (\in_array(ComplexDirectiveInterface::class, $interfaces, true) ? 'Complex ' : 'Scalar ') .
-                            " \n\n";
+                            (\in_array(IgnoreDefaultInterface::class, $interfaces, true) ? ' **|** Ignore Default' : '') . " \n\n";
                         $res .= $classDocBlock->getDescription()->render() . "\n\n";
 
                         foreach ($reflectionFile->getProperties() as $property) {
