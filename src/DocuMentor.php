@@ -42,13 +42,15 @@ class DocuMentor
      */
     private $configDirectory;
 
-
     /**
      * DocuMentor constructor.
-     * @param String $this->>docsDirectory
+     * @param String $docsDirectory
+     * @param String $configDirectory
      */
     public function __construct(String $docsDirectory = __DIR__ . '/../docs', String $configDirectory = __DIR__ . '/Config')
     {
+        $this->docsDirectory = $docsDirectory;
+        $this->configDirectory = $configDirectory;
         if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755, true) && !is_dir($this->docsDirectory)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->docsDirectory));
         }

@@ -4,6 +4,14 @@ namespace ObjectivePHP\DocuMentor\Config;
 
 use ObjectivePHP\Config\Directive\AbstractComplexDirective;
 
+/**
+ * Class ExampleConfig
+ *
+ * This class is a config directive with purpose is to give examples for documentation
+ * Hope this helps, is also used for development tests
+ *
+ * @package ObjectivePHP\DocuMentor\Config
+ */
 class ExampleConfig extends AbstractComplexDirective
 {
     const KEY = 'example';
@@ -33,13 +41,13 @@ class ExampleConfig extends AbstractComplexDirective
      * @config-attribute     hash
      *
      * @config-example-value {
-     * @config-example-value "user_name": "Mocks username",
-     * @config-example-value "brother_name": "Mocks brothername"
+     * @config-example-value "user_name": "My username",
+     * @config-example-value "psoeudonyme": "My psoeudo"
      * @config-example-value }
      *
      * @var User
      */
-    protected $mockUser;
+    protected $myUser;
 
     /**
      * Two lines String
@@ -47,132 +55,54 @@ class ExampleConfig extends AbstractComplexDirective
      * Take attention where the quotes are placed
      *
      * @config-attribute
-     * @config-example-value  Start of a string
-     * @config-example-value  end of a string
+     * @config-example-value  'Start of a string an
+     * @config-example-value  d end of a string'
      * @var string
      */
-    protected $defaultTargetPath = '/';
+    protected $exampleForAString;
 
     /**
+     * String without the example-value
+     *
+     * This one takes automatically the default value for the doc
+     *
      * @config-attribute
      *
      * @var string
      */
-    protected $logoutTargetPath = '/';
+    protected $anyStringPath = 'MyDefaultString';
+
 
     /**
+     * Boolean Support
+     *
      * @config-attribute
      *
-     * @var string
+     * @config-example-value true
+     *
+     * @var boolean
      */
-    protected $profileAssociationPath = '/connect/profile-association';
+    protected $booleanValue;
 
     /**
-     * @config-attribute
-     *
-     * @config-example-value 'connect.profile-association.service'
-     *
-     * @var string
+     * @return array
      */
-    protected $profileAssociationService;
-
-    /**
-     * @config-attribute
-     *
-     * @config-example-value 'http://my-
-     * @config-example-value site.com'
-     *
-     * @var string
-     */
-    protected $entityId;
-
-    /**
-     * @config-attribute
-     *
-     * @config-example-value 'http://idp.com'
-     *
-     * @var string
-     */
-    protected $idpEntityId;
-
-    /**
-     * @config-attribute
-     *
-     * @config-example-value 'My SP name'
-     *
-     * @var string Entity name (replaced by entityId if not set)
-     */
-    protected $name;
-
-    /**
-     * @config-attribute
-     *
-     * @var string
-     */
-    protected $samlMetadataBasedir = 'app/config/Saml/metadata';
-
-    /**
-     * @config-attribute
-     *
-     * @var string
-     */
-    protected $spMetadataFile = 'sp.xml';
-
-    /**
-     * @config-attribute
-     *
-     * @var string
-     */
-    protected $idpMetadataFile;
-
-    /**
-     * @config-attribute
-     *
-     * @var string
-     */
-    protected $idpMetadataFileTarget = '/idp.xml';
-
-    /**
-     * @config-attribute
-     *
-     * @var string
-     */
-    protected $privateKeyFilePath = 'app/config/key/sp.pem';
-
-    /**
-     * @config-attribute
-     *
-     * @var string
-     */
-    protected $adminPathInfo = '/connect/admin';
-
-    /**
-     * Get client status
-     *
-     * @return bool
-     */
-    public function enable(): bool
+    public function getSomeArray(): array
     {
-        return $this->enable;
+        return $this->someArray;
     }
 
     /**
-     * Set enable
-     *
-     * @param bool $enable
-     *
-     * @return $this
+     * @param array $someArray
+     * @return ExampleConfig
      */
-    public function setEnable(bool $enable)
+    public function setSomeArray(array $someArray): ExampleConfig
     {
-        $this->enable = $enable;
-
+        $this->someArray = $someArray;
         return $this;
     }
 
     /**
-     * Get MockUser
-     *
      * @return User
      */
     public function getMockUser(): User
@@ -181,328 +111,68 @@ class ExampleConfig extends AbstractComplexDirective
     }
 
     /**
-     * Set MockUser
-     *
-     * @param array $mockUser
-     *
-     * @return $this
+     * @param User $mockUser
+     * @return ExampleConfig
      */
-    public function setMockUser(array $mockUser)
+    public function setMockUser(User $mockUser): ExampleConfig
     {
-        $this->mockUser = new User($mockUser);
-
+        $this->mockUser = $mockUser;
         return $this;
     }
 
     /**
-     * Get DefaultTargetPath
-     *
      * @return string
      */
-    public function getDefaultTargetPath(): string
+    public function getExampleForAString(): string
     {
-        return $this->defaultTargetPath;
+        return $this->exampleForAString;
     }
 
     /**
-     * Set DefaultTargetPath
-     *
-     * @param string $defaultTargetPath
-     *
-     * @return $this
+     * @param string $exampleForAString
+     * @return ExampleConfig
      */
-    public function setDefaultTargetPath(string $defaultTargetPath)
+    public function setExampleForAString(string $exampleForAString): ExampleConfig
     {
-        $this->defaultTargetPath = $defaultTargetPath;
-
+        $this->exampleForAString = $exampleForAString;
         return $this;
     }
 
     /**
-     * Get LogoutTargetPath
-     *
      * @return string
      */
-    public function getLogoutTargetPath(): string
+    public function getAnyStringPath(): string
     {
-        return $this->logoutTargetPath;
+        return $this->anyStringPath;
     }
 
     /**
-     * Set LogoutTargetPath
-     *
-     * @param string $logoutTargetPath
-     *
-     * @return $this
+     * @param string $anyStringPath
+     * @return ExampleConfig
      */
-    public function setLogoutTargetPath(string $logoutTargetPath)
+    public function setAnyStringPath(string $anyStringPath): ExampleConfig
     {
-        $this->logoutTargetPath = $logoutTargetPath;
-
+        $this->anyStringPath = $anyStringPath;
         return $this;
     }
 
     /**
-     * Get ProfileAssociationPath
-     *
-     * @return string
+     * @return bool
      */
-    public function getProfileAssociationPath(): string
+    public function isBooleanValue(): bool
     {
-        return $this->profileAssociationPath;
+        return $this->booleanValue;
     }
 
     /**
-     * Set ProfileAssociationPath
-     *
-     * @param string $profileAssociationPath
-     *
-     * @return $this
+     * @param bool $booleanValue
+     * @return ExampleConfig
      */
-    public function setProfileAssociationPath(string $profileAssociationPath)
+    public function setBooleanValue(bool $booleanValue): ExampleConfig
     {
-        $this->profileAssociationPath = $profileAssociationPath;
-
+        $this->booleanValue = $booleanValue;
         return $this;
     }
 
-    /**
-     * Get ProfileAssociationService
-     *
-     * @return string
-     */
-    public function getProfileAssociationService(): string
-    {
-        return $this->profileAssociationService;
-    }
 
-    /**
-     * Set ProfileAssociationService
-     *
-     * @param string $profileAssociationService
-     *
-     * @return $this
-     */
-    public function setProfileAssociationService(string $profileAssociationService)
-    {
-        $this->profileAssociationService = $profileAssociationService;
-
-        return $this;
-    }
-
-    /**
-     * Get EntityId
-     *
-     * @return string
-     */
-    public function getEntityId(): string
-    {
-        return $this->entityId;
-    }
-
-    /**
-     * Set EntityId
-     *
-     * @param string $entityId
-     *
-     * @return $this
-     */
-    public function setEntityId(string $entityId)
-    {
-        $this->entityId = $entityId;
-
-        return $this;
-    }
-
-    /**
-     * Get IdpEntityId
-     *
-     * @return string
-     */
-    public function getIdpEntityId(): string
-    {
-        return $this->idpEntityId;
-    }
-
-    /**
-     * Set IdpEntityId
-     *
-     * @param string $idpEntityId
-     *
-     * @return $this
-     */
-    public function setIdpEntityId(string $idpEntityId)
-    {
-        $this->idpEntityId = $idpEntityId;
-
-        return $this;
-    }
-
-    /**
-     * Get Name
-     *
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set Name
-     *
-     * @param string $name
-     *
-     * @return $this
-     */
-    public function setName(string $name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get SamlMetadataBasedir
-     *
-     * @return string
-     */
-    public function getSamlMetadataBasedir(): string
-    {
-        return $this->samlMetadataBasedir;
-    }
-
-    /**
-     * Set SamlMetadataBasedir
-     *
-     * @param string $samlMetadataBasedir
-     *
-     * @return $this
-     */
-    public function setSamlMetadataBasedir(string $samlMetadataBasedir)
-    {
-        $this->samlMetadataBasedir = $samlMetadataBasedir;
-
-        return $this;
-    }
-
-    /**
-     * Get SpMetadataFile
-     *
-     * @return string
-     */
-    public function getSpMetadataFile(): string
-    {
-        return $this->spMetadataFile;
-    }
-
-    /**
-     * Set SpMetadataFile
-     *
-     * @param string $spMetadataFile
-     *
-     * @return $this
-     */
-    public function setSpMetadataFile(string $spMetadataFile)
-    {
-        $this->spMetadataFile = $spMetadataFile;
-
-        return $this;
-    }
-
-    /**
-     * Get IdpMetadataFile
-     *
-     * @return string
-     */
-    public function getIdpMetadataFile(): string
-    {
-        return $this->idpMetadataFile;
-    }
-
-    /**
-     * Set IdpMetadataFile
-     *
-     * @param string $idpMetadataFile
-     *
-     * @return $this
-     */
-    public function setIdpMetadataFile(string $idpMetadataFile)
-    {
-        $this->idpMetadataFile = $idpMetadataFile;
-
-        return $this;
-    }
-
-    /**
-     * Get IdpMetadataFileTarget
-     *
-     * @return string
-     */
-    public function getIdpMetadataFileTarget(): string
-    {
-        return $this->idpMetadataFileTarget;
-    }
-
-    /**
-     * Set IdpMetadataFileTarget
-     *
-     * @param string $idpMetadataFileTarget
-     *
-     * @return $this
-     */
-    public function setIdpMetadataFileTarget(string $idpMetadataFileTarget)
-    {
-        $this->idpMetadataFileTarget = $idpMetadataFileTarget;
-
-        return $this;
-    }
-
-    /**
-     * Get PrivateKeyFilePath
-     *
-     * @return string
-     */
-    public function getPrivateKeyFilePath(): string
-    {
-        return $this->privateKeyFilePath;
-    }
-
-    /**
-     * Set PrivateKeyFilePath
-     *
-     * @param string $privateKeyFilePath
-     *
-     * @return $this
-     */
-    public function setPrivateKeyFilePath(string $privateKeyFilePath)
-    {
-        $this->privateKeyFilePath = $privateKeyFilePath;
-
-        return $this;
-    }
-
-    /**
-     * Get AdminPathInfo
-     *
-     * @return string
-     */
-    public function getAdminPathInfo(): string
-    {
-        return $this->adminPathInfo;
-    }
-
-    /**
-     * Set AdminPathInfo
-     *
-     * @param string $adminPathInfo
-     *
-     * @return $this
-     */
-    public function setAdminPathInfo(string $adminPathInfo)
-    {
-        $this->adminPathInfo = $adminPathInfo;
-
-        return $this;
-    }
 }

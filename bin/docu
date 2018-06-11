@@ -16,7 +16,7 @@ $options = [
     'init'        => 0,
     'config'      => 0,
     'verbose'     => 0,
-    'configs-dir' => __DIR__ . '/../../../../src/Config',
+    'config-dir' => __DIR__ . '/../../../../src/Config',
     'docs-dir'    => __DIR__ . '/../../../../docs',
 ];
 
@@ -79,7 +79,7 @@ foreach ($args as $i => $arg) {
             break;
         case 'd':
         case 'dev':
-            $options['configs-dir'] = __DIR__ . '/../src/Config';
+            $options['config-dir'] = __DIR__ . '/../src/Config';
             $options['docs-dir'] = __DIR__ . '/../docs';
             break;
         case 'docs-dir':
@@ -91,6 +91,14 @@ foreach ($args as $i => $arg) {
         default:
             fail('Argument unkwown : ' . $arg);
     }
+}
+
+if ($options['verbose']) {
+    echo "\nDocu will run with those options : \n\n";
+    foreach ($options as $name => $value) {
+        echo "      [$name] => $value\n";
+    }
+    echo "\n";
 }
 
 $docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor($options['docs-dir'],$options['config-dir']);
