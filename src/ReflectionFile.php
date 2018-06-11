@@ -19,17 +19,17 @@ class ReflectionFile extends \ReflectionClass
     /**
      * ReflectionFile constructor.
      * @param $pathToFile
-     * @throws Exception
+     * @throws \Exception
      * @throws \ReflectionException
      */
     public function __construct($pathToFile)
     {
         $this->reflect($pathToFile);
         if ($this->namespace) {
-            $this->namespace .=  '\\' . basename($pathToFile, '.php');
+            $this->namespace .= '\\' . basename($pathToFile, '.php');
             parent::__construct($this->namespace);
         } else {
-            throw new Exception();
+            throw new \Exception();
         }
     }
 
@@ -38,12 +38,12 @@ class ReflectionFile extends \ReflectionClass
      */
     protected function reflect(String $pathToFile): void
     {
-        $tokens = token_get_all($contents = file_get_contents($pathToFile));
+        $tokens = token_get_all(file_get_contents($pathToFile));
         foreach ($tokens as $key => $token) {
             if (!\is_array($token)) {
                 break;
             }
-            [$type, $value, $line] = $token;
+            [$type, $value] = $token;
             switch ($type) {
                 case T_DOC_COMMENT:
                     if (!$this->namespace) {
@@ -58,17 +58,12 @@ class ReflectionFile extends \ReflectionClass
                         }
                         $this->namespace .= \is_array($tokens[$key]) ? $tokens[$key][1] : $tokens[$key];
                     }
-                    break; //TODO à changer si on parcours la classe + en profondeur, dois etre breaké avant la fin du fichier
+                    break;
                 case T_OPEN_TAG:
                 case T_WHITESPACE:
                     break;
-                default:
-                    /* $this->fileDocComment = '';*/
-                    break;
             }
         }
-        /*if (preg_match('#^namespace\s+(.+?);$#sm', $contents, $m)) { //Plus complexe avec les tokens
-            return $m[1] . '\\' . basename($pathToFile, '.php');*/
     }
 
     /**
