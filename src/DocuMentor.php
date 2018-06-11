@@ -97,8 +97,8 @@ class DocuMentor
                         $res .= '## ' . $fqcn . "\n\n";
                         $res .= $classDocBlock->getSummary() . "\n\n\n";
                         $res .= '**KEY:** ' . $directiveKey . ' **TYPE:** ' .
-                            ($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true) ? 'Multi ' : '') .
-                            (\in_array(ComplexDirectiveInterface::class, $interfaces, true) ? 'Complex ' : 'Scalar ') .
+                            (($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true)) ? 'Multi ' : '') .
+                            (($isComplex = \in_array(ComplexDirectiveInterface::class, $interfaces, true)) ? 'Complex ' : 'Scalar ') .
                             (\in_array(IgnoreDefaultInterface::class, $interfaces, true) ? ' **|** Ignore Default' : '') . " \n\n";
                         $res .= $classDocBlock->getDescription()->render() . "\n\n";
 
@@ -116,6 +116,10 @@ class DocuMentor
                                         isset($tab) ?: $tab = 'Property | Type | Example value | Summary | Description' . "\n" . '--- | --- | --- | --- | ---' . "\n";
                                         $tab .= $propertyName . '|' . $this->getPropertyType($docBlock) . '|' . json_encode($this->getExample($docBlock, $reflectionProperty, $fqcn), JSON_UNESCAPED_SLASHES) . '|' . $docBlock->getSummary() . '|' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . "\n";
                                         $valuesExample[$propertyName] = $this->getExample($docBlock, $reflectionProperty, $fqcn);
+                                    } elseif ($property->name === 'key' && !$isComplex) {
+                                        if ($docBlock->getTagsByName('config-example-value')) {
+                                            $valuesExample = $this->getExample($docBlock, $reflectionProperty, $fqcn);
+                                        }
                                     }
                                 } else {
                                     throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
@@ -158,8 +162,7 @@ class DocuMentor
     {
         $type = 'No type not ok !';
         if ($tags = $docBlock->getTagsByName('config-attribute')) {
-            if ($type = $tags[0]->getType()) {
-            } else {
+            if (!$type = $tags[0]->getType()) {
                 //Pas de type renseigné, on prend celui de @var
                 if ($tags = $docBlock->getTagsByName('var')) {
                     if (!($type = $tags[0]->getType())) {

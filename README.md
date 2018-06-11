@@ -15,9 +15,12 @@ We tried to write documentation in many ways but we choose to write a tool to ge
  ```
 The will be accessible in ./vendor/bin
 
-## Configuration directive documentation guide
-
-[Here](Doc-guide.md)
+## Configuration directive documentation guides
+For :
+- [Scalar](/doc/Scalar.md)
+- [Complex](/doc/Complex.md)
+- [MultiScalar](/doc/MultiScalar.md)
+- [MultiComplex](/doc/MultiComplex.md)
 
 ## How to use
 
