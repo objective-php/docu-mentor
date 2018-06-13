@@ -21,15 +21,15 @@ class ConfigIndex extends BaseTag implements StaticMethod
     /**
      * @var null|string
      */
-    protected $exampleIndex;
+    protected $value;
 
     /**
      * Para constructor.
-     * @param string $exampleIndex
+     * @param string $value
      */
-    public function __construct($exampleIndex = null)
+    public function __construct($value = null)
     {
-        $this->exampleIndex = $exampleIndex;
+        $this->value = $value;
     }
 
     /**
@@ -37,16 +37,15 @@ class ConfigIndex extends BaseTag implements StaticMethod
      */
     public static function create($body, TypeResolver $typeResolver = null, DescriptionFactory $descFactory = null, TypeContext $context = null)
     {
-        $exampleIndex = trim(str_replace('"', '\'', $body), '\'');
-        return new static($exampleIndex);
+        return new static($body);
     }
 
     /**
      * @return null|string
      */
-    public function getExampleIndex(): ?string
+    public function getValue(): ?string
     {
-        return $this->exampleIndex;
+        return $this->value;
     }
 
     /**
@@ -56,6 +55,6 @@ class ConfigIndex extends BaseTag implements StaticMethod
      */
     public function __toString()
     {
-        return $this->exampleIndex ?: '';
+        return $this->value ?: '';
     }
 }

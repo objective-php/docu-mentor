@@ -21,15 +21,15 @@ class ConfigExampleValue extends BaseTag implements StaticMethod
     /**
      * @var mixed
      */
-    protected $exampleValue;
+    protected $value;
 
     /**
      * Para constructor.
-     * @param string $exampleValue
+     * @param string $value
      */
-    public function __construct($exampleValue = null)
+    public function __construct($value = null)
     {
-        $this->exampleValue = $exampleValue;
+        $this->value = $value;
     }
 
     /**
@@ -45,9 +45,9 @@ class ConfigExampleValue extends BaseTag implements StaticMethod
      *
      * @return mixed
      */
-    public function getExampleValue()
+    public function getValue()
     {
-        return $this->exampleValue;
+        return $this->value;
     }
 
     /**
@@ -57,6 +57,6 @@ class ConfigExampleValue extends BaseTag implements StaticMethod
      */
     public function __toString(): string
     {
-        return json_encode($this->exampleValue) ?: '';
+        return json_encode($this->value) ?: '';
     }
 }

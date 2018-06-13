@@ -2,10 +2,10 @@
 
 namespace ObjectivePHP\DocuMentor;
 
-use ObjectivePHP\Config\Directive\ComplexDirectiveInterface;
 use ObjectivePHP\Config\Directive\DirectiveInterface;
 use ObjectivePHP\Config\Directive\IgnoreDefaultInterface;
 use ObjectivePHP\Config\Directive\MultiValueDirectiveInterface;
+use ObjectivePHP\Config\Directive\ScalarDirectiveInterface;
 use ObjectivePHP\DocuMentor\Exception\DirectiveStructureException;
 use ObjectivePHP\DocuMentor\Exception\TagSyntaxException;
 use ObjectivePHP\DocuMentor\Tags\ConfigAttribute;
@@ -98,7 +98,7 @@ class DocuMentor
                         $res .= $classDocBlock->getSummary() . "\n\n\n";
                         $res .= '**KEY:** ' . $directiveKey . ' **TYPE:** ' .
                             (($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true)) ? 'Multi ' : '') .
-                            (($isComplex = \in_array(ComplexDirectiveInterface::class, $interfaces, true)) ? 'Complex ' : 'Scalar ') .
+                            (($isScalar = \in_array(ScalarDirectiveInterface::class, $interfaces, true)) ? 'Scalar ' : 'Complex ') .
                             (\in_array(IgnoreDefaultInterface::class, $interfaces, true) ? ' **|** Ignore Default' : '') . " \n\n";
                         $res .= $classDocBlock->getDescription()->render() . "\n\n";
 
@@ -108,18 +108,14 @@ class DocuMentor
                                 if ($docComment = $reflectionProperty->getDocComment()) {
                                     $docBlock = $this->docBlockFactory->create($docComment);
                                     if ($docBlock->hasTag('config-index')) {
-                                        $exempleIndex = $docBlock->getTagsByName('config-index')[0]->getExampleIndex();
-                                        if ($docBlock->getTagsByName('config-example-value')) {
-                                            $valuesExample = $this->getExample($docBlock, $reflectionProperty, $fqcn);
-                                        }
+                                        $exempleIndex = $this->getExample($docBlock->getTagsByName('config-index'), $reflectionProperty, $fqcn);
                                     } elseif ($docBlock->hasTag('config-attribute')) {
+                                        $example = $this->getExample($docBlock->getTagsByName('config-example-value'), $reflectionProperty, $fqcn);
                                         isset($tab) ?: $tab = 'Property | Type | Example value | Summary | Description' . "\n" . '--- | --- | --- | --- | ---' . "\n";
-                                        $tab .= $propertyName . '|' . $this->getPropertyType($docBlock) . '|' . json_encode($this->getExample($docBlock, $reflectionProperty, $fqcn), JSON_UNESCAPED_SLASHES) . '|' . $docBlock->getSummary() . '|' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . "\n";
-                                        $valuesExample[$propertyName] = $this->getExample($docBlock, $reflectionProperty, $fqcn);
-                                    } elseif ($property->name === 'key' && !$isComplex) {
-                                        if ($docBlock->getTagsByName('config-example-value')) {
-                                            $valuesExample = $this->getExample($docBlock, $reflectionProperty, $fqcn);
-                                        }
+                                        $tab .= $propertyName . '|' . $this->getPropertyType($docBlock) . '|' . json_encode($example, JSON_UNESCAPED_SLASHES) . '|' . $docBlock->getSummary() . '|' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . "\n";
+                                        $valuesExample[$propertyName] = $example;
+                                    } elseif ($isScalar && $property->name === 'key') {
+                                        $valuesExample = $this->getExample($docBlock->getTagsByName('config-example-value'), $reflectionProperty, $fqcn);
                                     }
                                 } else {
                                     throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
@@ -129,14 +125,7 @@ class DocuMentor
                             }
                         }
                         $res .= $tab;
-                        if ($isMulti) {
-                            if ($exempleIndex) {
-                                $valuesExample = [$exempleIndex => $valuesExample];
-                            } else {
-                                throw new DirectiveStructureException('You didn\'t overload the $reference or didn\'t comment it correctly in ' . $reflectionFile->getFileName());
-                            }
-                        }
-                        $res .= "\n```json  \n" . json_encode([$directiveKey => $valuesExample], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n```\n";
+                        $res .= "\n```json  \n" . json_encode([$directiveKey => $isMulti ? [$exempleIndex => $valuesExample] : $valuesExample], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n```\n";
                     }
                 } catch (\Exception $exception) {
                     $this->report[] = $exception;
@@ -147,7 +136,6 @@ class DocuMentor
             }
         } catch (\Exception $exception) {
             $this->report[] = $exception;
-            return false;
         }
         return false;
     }
@@ -175,30 +163,28 @@ class DocuMentor
     }
 
     /**
-     * @param DocBlock            $docBlock
+     * @param mixed               $tags
      * @param \ReflectionProperty $reflectionProperty
      * @param String              $fqcn
      * @return bool|mixed|string
      * @throws TagSyntaxException
      */
-    public function getExample(DocBlock $docBlock, \ReflectionProperty $reflectionProperty, String $fqcn)
+    public function getExample($tags, \ReflectionProperty $reflectionProperty, String $fqcn)
     {
-        if ($tags = $docBlock->getTagsByName('config-example-value')) {
-            if ($tags[0]->getExampleValue()) {
-                $body = '';
-                foreach ($tags as $tag) {
-                    $body .= $tag->getExampleValue();
+        $body = '';
+        foreach ($tags as $tag) {
+            $body .= $tag->getValue();
+        }
+
+        if ($body) {
+            if (preg_match('/^array\(.*\)$|^{.*}$/', $body)) {
+                $body = preg_replace(['/^(array\()/', '/(\')/', '/(\))$/'], ['[', '"', ']'], $body);
+                if (!($res = json_decode($body, true))) {
+                    throw new TagSyntaxException("@" . $tag->getName() . " of\e[31m \$$reflectionProperty->name \e[0mas a bad syntax : $body\n in " . $fqcn);
                 }
-                if (preg_match('/^array\(.*\)$|^{.*}$/', $body)) {
-                    $body = preg_replace(['/^(array\()/', '/(\')/', '/(\))$/'], ['[', '"', ']'], $body);
-                    if (!($res = json_decode($body, true))) {
-                        throw new TagSyntaxException("@config-example-value of\e[31m \$$reflectionProperty->name \e[0mas a bad syntax : $body\n in " . $fqcn);
-                    }
-                    return $res;
-                }
-                return trim($body, '\'"');
+                return $res;
             }
-            throw new TagSyntaxException('@config-example-value needs an example like this :  @config-example-value  value');
+            return trim($body, '\'"');
         }
         $reflectionProperty->setAccessible(true);
         return $reflectionProperty->getValue(new $fqcn);
