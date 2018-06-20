@@ -1,6 +1,6 @@
 .idea/
 vendor/
-src/Config/*
-!src/Config/ExampleConfig.php
-docs/
-src/index.php
+/src/Config/*
+!/src/Config/ExampleConfig.php
+/docs/
+/src/index.php

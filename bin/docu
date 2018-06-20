@@ -145,7 +145,7 @@ if ($options['verbose']) {
         echo "\n\e[31m EXCEPTION\e[32m " . ++$key . "\e[31m : \e[0m\n";
         echo "\e[35m  MESSAGE :\e[0m " . $exception->getMessage();
         if ($options['verbose'] > 1) {
-            echo "\n\e[35m  LINE :\e[0m " . $exception->getLine() . " in " . $exception->getFile();
+            echo "\n\e[35m  LINE :\e[0m " . $exception->getLine() . ' in ' . $exception->getFile();
             if ($options['verbose'] > 2) {
                 echo "\n\e[35m  TRACE :\e[0m " . $exception->getTraceAsString();
             }

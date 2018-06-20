@@ -9,14 +9,14 @@ use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Context as TypeContext;
 
 /**
- * Reflection class for the {@}config-index tag in a Docblock.
+ * Reflection class for the {@}config-example-reference tag in a Docblock.
  */
-class ConfigIndex extends BaseTag implements StaticMethod
+class ConfigExampleReference extends BaseTag implements StaticMethod
 {
     /**
      * @var string
      */
-    protected $name = 'config-index';
+    protected $name = 'config-example-reference';
 
     /**
      * @var null|string

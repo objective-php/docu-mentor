@@ -10,7 +10,7 @@ use ObjectivePHP\DocuMentor\Exception\DirectiveStructureException;
 use ObjectivePHP\DocuMentor\Exception\TagSyntaxException;
 use ObjectivePHP\DocuMentor\Tags\ConfigAttribute;
 use ObjectivePHP\DocuMentor\Tags\ConfigExampleValue;
-use ObjectivePHP\DocuMentor\Tags\ConfigIndex;
+use ObjectivePHP\DocuMentor\Tags\ConfigExampleReference;
 use ObjectivePHP\Matcher\Exception;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
@@ -18,6 +18,7 @@ use Symfony\Component\Finder\Finder;
 
 /**
  * Class DocuMentor
+ *
  * @package ObjectivePHP\DocuMentor
  */
 class DocuMentor
@@ -50,19 +51,26 @@ class DocuMentor
 
     /**
      * DocuMentor constructor.
+     *
      * @param String $docsDirectory
      * @param String $configDirectory
      */
-    public function __construct(String $docsDirectory = __DIR__ . '/../docs', String $configDirectory = __DIR__ . '/Config')
-    {
+    public function __construct(
+        String $docsDirectory = __DIR__ . '/../docs',
+        String $configDirectory = __DIR__ . '/Config'
+    ) {
         $this->docsDirectory = $docsDirectory;
         $this->configDirectory = $configDirectory;
-        if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755, true) && !is_dir($this->docsDirectory)) {
+        if (!is_dir($this->docsDirectory)
+            && !mkdir($this->docsDirectory, 0755, true)
+            && !is_dir($this->docsDirectory)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->docsDirectory));
         }
-        $customTags = ['config-attribute'     => ConfigAttribute::class,
-                       'config-index'         => ConfigIndex::class,
-                       'config-example-value' => ConfigExampleValue::class];
+        $customTags = [
+            'config-attribute'         => ConfigAttribute::class,
+            'config-example-value'     => ConfigExampleValue::class,
+            'config-example-reference' => ConfigExampleReference::class
+        ];
         $this->docBlockFactory = DocBlockFactory::createInstance($customTags);
         $this->componentName = json_decode(file_get_contents(__DIR__ . '/../composer.json'), true)['name'];
         $this->docsDirectory = $docsDirectory;
@@ -87,7 +95,11 @@ class DocuMentor
                         throw new DirectiveStructureException('No KEY found in ' . $file->getFilename());
                     }
                     // S'il sagit bien d'une directive
-                    if (\in_array(DirectiveInterface::class, $interfaces = $reflectionFile->getInterfaceNames(), true)) {
+                    if (\in_array(
+                        DirectiveInterface::class,
+                        $interfaces = $reflectionFile->getInterfaceNames(),
+                        true
+                    )) {
                         if (!($docBlock = $reflectionFile->getDocComment())) {
                             $docBlock = '/***/';
                         }
@@ -97,35 +109,74 @@ class DocuMentor
                         $res .= '## ' . $fqcn . "\n\n";
                         $res .= $classDocBlock->getSummary() . "\n\n\n";
                         $res .= '**KEY:** ' . $directiveKey . ' **TYPE:** ' .
-                            (($isMulti = \in_array(MultiValueDirectiveInterface::class, $interfaces, true)) ? 'Multi ' : '') .
-                            (($isScalar = \in_array(ScalarDirectiveInterface::class, $interfaces, true)) ? 'Scalar ' : 'Complex ') .
-                            (\in_array(IgnoreDefaultInterface::class, $interfaces, true) ? ' **|** Ignore Default' : '') . " \n\n";
+                            (($isMulti = \in_array(
+                                MultiValueDirectiveInterface::class,
+                                $interfaces,
+                                true
+                            )) ? 'Multi ' : '') .
+                            (($isScalar = \in_array(
+                                ScalarDirectiveInterface::class,
+                                $interfaces,
+                                true
+                            )) ? 'Scalar ' : 'Complex ') .
+                            (\in_array(
+                                IgnoreDefaultInterface::class,
+                                $interfaces,
+                                true
+                            ) ? ' **|** Ignore Default' : '') . " \n\n";
                         $res .= $classDocBlock->getDescription()->render() . "\n\n";
 
-                        foreach ($reflectionFile->getProperties() as $property) {
-                            try {
-                                $reflectionProperty = $reflectionFile->getProperty($propertyName = $property->name);
-                                if ($docComment = $reflectionProperty->getDocComment()) {
-                                    $docBlock = $this->docBlockFactory->create($docComment);
-                                    if ($docBlock->hasTag('config-index')) {
-                                        $exempleIndex = $this->getExample($docBlock->getTagsByName('config-index'), $reflectionProperty, $fqcn);
-                                    } elseif ($docBlock->hasTag('config-attribute')) {
-                                        $example = $this->getExample($docBlock->getTagsByName('config-example-value'), $reflectionProperty, $fqcn);
-                                        isset($tab) ?: $tab = 'Property | Type | Example value | Summary | Description' . "\n" . '--- | --- | --- | --- | ---' . "\n";
-                                        $tab .= $propertyName . '|' . $this->getPropertyType($docBlock) . '|' . json_encode($example, JSON_UNESCAPED_SLASHES) . '|' . $docBlock->getSummary() . '|' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . "\n";
-                                        $valuesExample[$propertyName] = $example;
-                                    } elseif ($isScalar && $property->name === 'key') {
-                                        $valuesExample = $this->getExample($docBlock->getTagsByName('config-example-value'), $reflectionProperty, $fqcn);
-                                    }
-                                } else {
-                                    throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
+                        if ($isScalar) {
+                            if ($classDocBlock->hasTag('config-example-value')) {
+                                $valuesExample = $classDocBlock->getTagsByName('config-example-value')[0]->getValue();
+                                if ($isMulti && $classDocBlock->hasTag('config-example-reference')) {
+                                    $exempleIndex = trim($classDocBlock->getTagsByName('config-example-reference')[0]->getValue(), '"');
                                 }
-                            } catch (\Exception $exception) {
-                                $this->report[] = $exception;
+                            }
+                        } else {
+                            foreach ($reflectionFile->getProperties() as $property) {
+                                try {
+                                    $reflectionProperty = $reflectionFile->getProperty($propertyName = $property->name);
+                                    if ($docComment = $reflectionProperty->getDocComment()) {
+                                        $docBlock = $this->docBlockFactory->create($docComment);
+                                        if ($docBlock->hasTag('config-example-reference')) {
+                                            $exempleIndex = $this->getExample(
+                                                $docBlock->getTagsByName('config-example-reference'),
+                                                $reflectionProperty,
+                                                $fqcn
+                                            );
+                                        } elseif ($docBlock->hasTag('config-attribute')) {
+                                            $example = $this->getExample(
+                                                $docBlock->getTagsByName('config-example-value'),
+                                                $reflectionProperty,
+                                                $fqcn
+                                            );
+                                            isset($tab) ?: $tab = 'Property | Type | Description | Example value' . "\n"
+                                                . '--- | --- | --- | ---' . "\n";
+                                            $tab .= $propertyName . '|' .
+                                                $this->getPropertyType($docBlock) . '|' .
+                                                $docBlock->getSummary() . '<br/>' .
+                                                preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) .
+                                                '|' . json_encode($example, JSON_UNESCAPED_SLASHES) . "\n";
+                                            $valuesExample[$propertyName] = $example;
+                                        }
+                                        //             elseif ($isScalar && $property->name === 'key') {
+                                        //                 $valuesExample = $this->getExample($docBlock->getTagsByName('config-example-value'), $reflectionProperty, $fqcn);
+                                        //             }
+                                    } else {
+                                        throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
+                                    }
+                                } catch (\Exception $exception) {
+                                    $this->report[] = $exception;
+                                }
                             }
                         }
                         $res .= $tab;
-                        $res .= "\n```json  \n" . json_encode([$directiveKey => $isMulti ? [$exempleIndex => $valuesExample] : $valuesExample], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n```\n";
+                        $res .= "\n```json  \n" .
+                            json_encode(
+                                [$directiveKey => $isMulti ? [$exempleIndex => $valuesExample] : $valuesExample],
+                                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+                            ) . "\n```\n";
                     }
                 } catch (\Exception $exception) {
                     $this->report[] = $exception;
@@ -137,12 +188,14 @@ class DocuMentor
         } catch (\Exception $exception) {
             $this->report[] = $exception;
         }
+
         return false;
     }
 
 
     /**
      * @param DocBlock $docBlock
+     *
      * @return string
      * @throws TagSyntaxException
      */
@@ -159,6 +212,7 @@ class DocuMentor
                 }
             }
         }
+
         return trim($type, '\\');
     }
 
@@ -166,6 +220,7 @@ class DocuMentor
      * @param mixed               $tags
      * @param \ReflectionProperty $reflectionProperty
      * @param String              $fqcn
+     *
      * @return bool|mixed|string
      * @throws TagSyntaxException
      */
@@ -182,16 +237,20 @@ class DocuMentor
                 if (!($res = json_decode($body, true))) {
                     throw new TagSyntaxException("@" . $tag->getName() . " of\e[31m \$$reflectionProperty->name \e[0mas a bad syntax : $body\n in " . $fqcn);
                 }
+
                 return $res;
             }
+
             return trim($body, '\'"');
         }
         $reflectionProperty->setAccessible(true);
+
         return $reflectionProperty->getValue(new $fqcn);
     }
 
     /**
      * @param bool $force
+     *
      * @return bool
      */
     public function initDocumentation($force = false): bool
@@ -203,7 +262,8 @@ class DocuMentor
             if (is_dir($this->docsDirectory) && !$force) {
                 throw new \Exception('You already have a docs folder');
             } else {
-                if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755, true) && !is_dir($this->docsDirectory)) {
+                if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755,
+                        true) && !is_dir($this->docsDirectory)) {
                     throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->docsDirectory));
                 }
                 foreach ($finder as $file) {
@@ -213,8 +273,10 @@ class DocuMentor
             }
         } catch (\Exception $exception) {
             $this->report[] = $exception;
+
             return false;
         }
+
         return true;
     }
 

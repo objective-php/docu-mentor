@@ -11,7 +11,7 @@ The directive should be commented and described in his class docblock :
 ```php
 <?php
 /**
- * NOT HERE, here you can have the GNU licence 
+ * NOT HERE, here you can have the GNU licence, or project presentation 
  */
 
 /**
@@ -22,7 +22,7 @@ The directive should be commented and described in his class docblock :
  * This is just the continuation maybe I Lorem Ipsum Dolores Esta may Andrian mateos doiaz catmarantt
  *
  */
-public class ServicesConfig {
+public class ExampleConfig {
 ```
 
 ### 2.The KEY
@@ -48,44 +48,6 @@ Si la directive en plus d'être multi est multi scalaire, alors le docblock de l
      * @var string 
      */
     protected $reference;
-```
-
-
-
-## Pour une directive de type Complex
-
-### 1.Les propriétés (ou paramètres)
-
-Chaque propriété doit avoir son docblock avec au minimum le tag @config-attribute.
-
-```php
-   /**
-     * Service class name
-     *
-     * Define here the FQCN of the service.
-     *
-     * @config-attribute
-     * @config-example-value 'Fully\\Qualified\\Class\\Name'
-     * @var string
-     */
-    protected $class;
-```
-
-### 2.Le problème du type
-
-Le type est automatiquement récupéré sur le tag @var mais peut être réécri derrière le tag @config-attribute
-
-```php
-    /**
-     * Setters to call on service once instantiated
-     *
-     * Array of key/value pairs with keys being setter method names and values being parameters to pass to setter
-     * methods.
-     *
-     * @config-attribute hash
-     * @var array
-     */
-    protected $setters;
 ```
 
 ## Les exemples
