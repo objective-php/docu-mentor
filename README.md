@@ -1,9 +1,14 @@
 # ObjectivePHP \ DocuMentor
 
-## Project introduction
+## Introduction
 We always wanted to make our framework Objective PHP serviceable for every person who get interested getting an use of it.
 We tried to write documentation in many ways but we choose to write a tool to generate a custom markdown documentation for every components.
 
+
+## Description
+Docu-mentor is a CLI tool for the documentation generation for packages.
+
+ 
  ## Installation
 
  ### Composer
@@ -13,14 +18,13 @@ We tried to write documentation in many ways but we choose to write a tool to ge
  ```
  composer require objective-php/docu-mentor 
  ```
-The will be accessible in ./vendor/bin
+The command will be accessible in ./vendor/bin
 
 ## Configuration directive documentation guides
 For :
-- [Scalar](/doc/Scalar.md)
-- [Complex](/doc/Complex.md)
-- [MultiScalar](/doc/MultiScalar.md)
-- [MultiComplex](/doc/MultiComplex.md)
+- [Scalar](/docs/Scalar.md)
+- [Complex](/docs/Complex.md)
+- [Example-Values](/docs/Example-Values.md)
 
 ## How to use
 

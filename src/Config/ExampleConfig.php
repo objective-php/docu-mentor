@@ -82,7 +82,7 @@ class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInt
     /**
      * String without the example-value
      *
-     * This one takes automatically the default value for the doc
+     * This one takes automatically the default value for the docs
      *
      * @config-attribute
      *

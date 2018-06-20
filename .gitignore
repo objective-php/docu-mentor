@@ -2,5 +2,4 @@
 vendor/
 /src/Config/*
 !/src/Config/ExampleConfig.php
-/docs/
-/src/index.php
+/output/

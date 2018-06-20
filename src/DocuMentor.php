@@ -128,9 +128,17 @@ class DocuMentor
 
                         if ($isScalar) {
                             if ($classDocBlock->hasTag('config-example-value')) {
-                                $valuesExample = $classDocBlock->getTagsByName('config-example-value')[0]->getValue();
+                                $tmp = '';
+                                foreach ($classDocBlock->getTagsByName('config-example-value') as $val) {
+                                    $tmp .= trim($val->getValue(), '\'"');
+                                }
+                                $valuesExample = $tmp;
+
                                 if ($isMulti && $classDocBlock->hasTag('config-example-reference')) {
-                                    $exempleIndex = trim($classDocBlock->getTagsByName('config-example-reference')[0]->getValue(), '"');
+                                    $exempleIndex = trim(
+                                        $classDocBlock->getTagsByName('config-example-reference')[0]->getValue(),
+                                        '\'"'
+                                    );
                                 }
                             }
                         } else {
@@ -157,12 +165,10 @@ class DocuMentor
                                                 $this->getPropertyType($docBlock) . '|' .
                                                 $docBlock->getSummary() . '<br/>' .
                                                 preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) .
-                                                '|' . json_encode($example, JSON_UNESCAPED_SLASHES) . "\n";
+                                                '|<pre><code class="json">' .
+                                                json_encode($example, JSON_UNESCAPED_SLASHES) . "</code></pre>\n";
                                             $valuesExample[$propertyName] = $example;
                                         }
-                                        //             elseif ($isScalar && $property->name === 'key') {
-                                        //                 $valuesExample = $this->getExample($docBlock->getTagsByName('config-example-value'), $reflectionProperty, $fqcn);
-                                        //             }
                                     } else {
                                         throw new TagSyntaxException('You didn\'t comment this property ! ' . $propertyName . ' in ' . $reflectionFile->getFileName());
                                     }

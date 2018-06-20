@@ -50,7 +50,7 @@ foreach ($argv as $i => $arg) {
 }
 
 if (empty($args)) {
-    $args[] = 'i';
+    $args[] = 'h';
 }
 
 foreach ($args as $i => $arg) {
@@ -80,7 +80,7 @@ foreach ($args as $i => $arg) {
         case 'd':
         case 'dev':
             $options['config-dir'] = __DIR__ . '/../src/Config';
-            $options['docs-dir'] = __DIR__ . '/../docs';
+            $options['docs-dir'] = __DIR__ . '/../output/docs';
             break;
         case 'docs-dir':
             $options['docs-dir'] = $i;
@@ -169,11 +169,11 @@ if ($nbException = count($docuMentor->getReport())) {
 function getHelpText()
 {
     return "
-Docu-mentor - Objective PHP's doc generator 
+Docu-mentor - Objective PHP's docs generator 
 
 Usage: docu [OPTIONS] 
     -i, --init      Generate the docs/.md files 
-    -c, --configs   Update the config-directive doc file
+    -c, --configs   Update the config-directive docs file
     -v, --verbose   Shows the errors
     -vv, -vvv       Shows the errors more expressly
     -f, --force     Overwrite the docs
@@ -189,7 +189,7 @@ Examples:
     Init the whole documentation:
         docu -ic
 
-    Rewrite the config doc:
+    Rewrite the config docs:
         docu -c -v
      
     Rewrite and debug your config:
