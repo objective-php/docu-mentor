@@ -9,5 +9,5 @@ We tried to write documentation in many ways but we choose to write a tool to ge
 Description
 ------------
 
-Docu-mentor is a CLI tool for the documentation generation for packages.
+Docu-mentor is a CLI tool for the documentation generation of packages.
 

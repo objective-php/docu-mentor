@@ -54,10 +54,12 @@ class DocuMentor
      *
      * @param String $docsDirectory
      * @param String $configDirectory
+     * @param String $composerFile
      */
     public function __construct(
         String $docsDirectory = __DIR__ . '/../docs',
-        String $configDirectory = __DIR__ . '/Config'
+        String $configDirectory = __DIR__ . '/Config',
+        String $composerFile = __DIR__ . '/../composer.json'
     ) {
         $this->docsDirectory = $docsDirectory;
         $this->configDirectory = $configDirectory;
@@ -72,7 +74,7 @@ class DocuMentor
             'config-example-reference' => ConfigExampleReference::class
         ];
         $this->docBlockFactory = DocBlockFactory::createInstance($customTags);
-        $this->componentName = json_decode(file_get_contents(__DIR__ . '/../composer.json'), true)['name'];
+        $this->componentName = json_decode(file_get_contents($composerFile), true)['name']; //TODO
         $this->docsDirectory = $docsDirectory;
         $this->configDirectory = $configDirectory;
     }
@@ -264,14 +266,9 @@ class DocuMentor
         try {
             $finder = new Finder();
             $finder->files()->in(__DIR__ . '/docs')->name('*.md');
-
-            if (is_dir($this->docsDirectory) && !$force) {
+            if (\count(scandir($this->docsDirectory, SCANDIR_SORT_NONE)) > 2 && !$force) {
                 throw new \Exception('You already have a docs folder');
             } else {
-                if (!is_dir($this->docsDirectory) && !mkdir($this->docsDirectory, 0755,
-                        true) && !is_dir($this->docsDirectory)) {
-                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->docsDirectory));
-                }
                 foreach ($finder as $file) {
                     $content = str_replace('{{REPO-NAME}}', $this->componentName, $file->getContents());
                     file_put_contents($this->docsDirectory . '/' . $file->getFilename(), $content);
