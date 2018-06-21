@@ -42,7 +42,9 @@ php docu [OPTIONS]
      --config-dir=[path]
                     Specify a custom path for the configs   
      --docs-dir=[path]   
-                    Specify a custom path for output directory   
+                    Specify a custom path for output directory
+     --composer-file=[path]   
+                    Specify a custom path for composer.json   
  ```                 
  
 ### Examples:
