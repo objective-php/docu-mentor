@@ -2,8 +2,16 @@
 
 namespace ObjectivePHP\DocuMentor;
 
-use ObjectivePHP\Matcher\Exception;
+use RuntimeException;
 
+/**
+ * Class ReflectionFile
+ *
+ * This Class extends ReflectionClass and add the ability to build the fqcn of a targeted class before doing reflection
+ * Additionally catch the filedocblock
+ *
+ * @package ObjectivePHP\DocuMentor
+ */
 class ReflectionFile extends \ReflectionClass
 {
     /**
@@ -18,8 +26,11 @@ class ReflectionFile extends \ReflectionClass
 
     /**
      * ReflectionFile constructor.
+     *
      * @param $pathToFile
-     * @throws \Exception
+     *
+     * @throws \RuntimeException
+     * @throws Exception
      * @throws \ReflectionException
      */
     public function __construct($pathToFile)
@@ -29,11 +40,15 @@ class ReflectionFile extends \ReflectionClass
             $this->namespace .= '\\' . basename($pathToFile, '.php');
             parent::__construct($this->namespace);
         } else {
-            throw new \Exception();
+            throw new RuntimeException('The namespace may don\'t match any class or other problem');
         }
     }
 
     /**
+     * Pre-reflection method
+     *
+     * This method uses the tokens to find the namespace
+     *
      * @param String $pathToFile
      */
     protected function reflect(String $pathToFile): void
@@ -67,7 +82,7 @@ class ReflectionFile extends \ReflectionClass
     }
 
     /**
-     * Retrieve the file docblock
+     * Getter for the file docblock
      *
      * @return string
      */
@@ -77,6 +92,8 @@ class ReflectionFile extends \ReflectionClass
     }
 
     /**
+     * Getter for the namespace
+     *
      * @return string
      */
     public function getNamespace(): string

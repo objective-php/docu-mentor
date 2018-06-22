@@ -22,9 +22,9 @@ The command will be accessible in ./vendor/bin
 
 ## Configuration directive documentation guides
 For :
-- [Scalar](/docs/Scalar.md)
-- [Complex](/docs/Complex.md)
-- [Example-Values](/docs/Example-Values.md)
+- [Scalar](/docs/03.Scalar.md)
+- [Complex](/docs/04.Complex.md)
+- [Example-Values](/docs/05.Example-Values.md)
 
 ## How to use
 

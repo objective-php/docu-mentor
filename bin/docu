@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+#!/usr/bin/php
 <?php
 
 if (file_exists($path = __DIR__ . '/../vendor/autoload.php')) {
@@ -11,13 +11,13 @@ if (file_exists($path = __DIR__ . '/../../../autoload.php')) {
 $separator = "\n" . str_repeat('-', exec('tput cols'));
 
 $options = [
-    'force'       => 0,
-    'init'        => 0,
-    'config'      => 0,
-    'verbose'     => 0,
-    'config-dir' => __DIR__ . '/../../../../src/Config',
-    'docs-dir'    => __DIR__ . '/../../../../docs',
-    'composer-file'    => __DIR__ . '/../../../../composer.json',
+    'force'         => 0,
+    'init'          => 0,
+    'config'        => 0,
+    'verbose'       => 0,
+    'config-dir'    => __DIR__ . '/../../../../src/Config',
+    'docs-dir'      => __DIR__ . '/../../../../docs',
+    'composer-file' => __DIR__ . '/../../../../composer.json',
 ];
 
 $args = [];
@@ -105,17 +105,21 @@ if ($options['verbose']) {
     echo "\n";
 }
 
-$docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor($options['docs-dir'],$options['config-dir'], $options['composer-file']);
+$docuMentor = new \ObjectivePHP\DocuMentor\DocuMentor(
+    $options['docs-dir'],
+    $options['config-dir'],
+    $options['composer-file']
+);
 
 //======================================================================
 // INIT
 //======================================================================
 if ($options['init']) {
     echo "Documentation initialization... \n\e[91m";
-    if (!$options['force'] && \count(scandir($options['docs-dir'], SCANDIR_SORT_NONE)) > 2 ) {
+    if (!$options['force'] && \count(scandir($options['docs-dir'], SCANDIR_SORT_NONE)) > 2) {
         echo "\n\e[31m ERROR :\e[0m Documentation initialization aborted";
         echo "\n\e[31m ERROR :\e[0m You already have a docs folder, use \e[32m--force\e[0m to overwrite \n";
-    } elseif ($docuMentor->initDocumentation( $options['force'])) {
+    } elseif ($docuMentor->initDocumentation($options['force'])) {
         echo "\n\e[1;30;42m SUCCESS \e[0m Documentation initialized\n\n";
         echo '/docs
     |- 01.quick-start.md

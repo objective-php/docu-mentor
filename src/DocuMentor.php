@@ -19,6 +19,8 @@ use Symfony\Component\Finder\Finder;
 /**
  * Class DocuMentor
  *
+ * The single manager of this package
+ *
  * @package ObjectivePHP\DocuMentor
  */
 class DocuMentor
@@ -80,6 +82,10 @@ class DocuMentor
     }
 
     /**
+     * Config Directive Documentation generator
+     *
+     * Parse the config files and try to generate a markdown file from it
+     *
      * @return bool
      */
     public function collectDirectiveConfigs(): bool
@@ -202,6 +208,8 @@ class DocuMentor
 
 
     /**
+     * Extract the type of a property from a docblock
+     *
      * @param DocBlock $docBlock
      *
      * @return string
@@ -225,6 +233,10 @@ class DocuMentor
     }
 
     /**
+     * Extract a example from property
+     *
+     * If the {@}config-example-value is not mentionned, tries to get a default value
+     *
      * @param mixed               $tags
      * @param \ReflectionProperty $reflectionProperty
      * @param String              $fqcn
@@ -257,6 +269,10 @@ class DocuMentor
     }
 
     /**
+     * Documentation initialization method
+     *
+     * Takes the docs templates in src/docs to generate an initial doc for the current package
+     *
      * @param bool $force
      *
      * @return bool
