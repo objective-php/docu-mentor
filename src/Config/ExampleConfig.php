@@ -59,8 +59,8 @@ class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInt
      *
      * @config-example-value    {
      * @config-example-value        "user_name": "My username",
-     * @config-example-value        "competences": ["php", "js"],
-     * @config-example-value        "psoeudonyme": "My psoeudo"
+     * @config-example-value        "skills": ["php", "js"],
+     * @config-example-value        "nickname": "My nickname"
      * @config-example-value    }
      *
      * @var User
@@ -73,8 +73,8 @@ class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInt
      * Take attention where the quotes are placed
      *
      * @config-attribute
-     * @config-example-value  'Start of a string an
-     * @config-example-value  d end of a string'
+     * @config-example-value  'Multi line
+     * @config-example-value  string'
      * @var string
      */
     protected $exampleForAString;
@@ -88,7 +88,7 @@ class ExampleConfig extends AbstractComplexDirective implements IgnoreDefaultInt
      *
      * @var string
      */
-    protected $anyStringPath = 'MyDefaultString';
+    protected $anyStringPath = 'MyDefault\\String';
 
 
     /**

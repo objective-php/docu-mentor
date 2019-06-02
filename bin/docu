@@ -1,23 +1,37 @@
 #!/usr/bin/php
 <?php
 
-if (file_exists($path = __DIR__ . '/../vendor/autoload.php')) {
-    require_once $path;
-}
-if (file_exists($path = __DIR__ . '/../../../autoload.php')) {
-    require_once $path;
+// compute project root
+$path = getcwd();
+$found = false;
+while($path != '/') {
+    echo $path . '/composer.json' . PHP_EOL;
+    if(file_exists($path . '/composer.json')) {
+        $found = true;
+        break;
+    }
+    $path = dirname($path);
 }
 
+if(!$found) {
+    fail('Cannot find project root');
+}
+
+require $path . '/vendor/autoload.php';
+
+
 $separator = "\n" . str_repeat('-', exec('tput cols'));
+
+
 
 $options = [
     'force'         => 0,
     'init'          => 0,
     'config'        => 0,
     'verbose'       => 0,
-    'config-dir'    => __DIR__ . '/../../../../src/Config',
-    'docs-dir'      => __DIR__ . '/../../../../docs',
-    'composer-file' => __DIR__ . '/../../../../composer.json',
+    'config-dir'    => $path . '/src/Config',
+    'docs-dir'      => $path . '/docs',
+    'composer-file' => $path . '/composer.json',
 ];
 
 $args = [];
@@ -41,10 +55,10 @@ foreach ($argv as $i => $arg) {
                     }
                     break;
                 default:
-                    fail('Argument badly writted : ' . $arg);
+                    fail('Invalid argument: ' . $arg);
             }
         } else {
-            fail('Argument badly writted : ' . $arg);
+            fail('Invalid argument: ' . $arg);
         }
     }
 }
@@ -93,7 +107,7 @@ foreach ($args as $i => $arg) {
             $options['composer-file'] = $i;
             break;
         default:
-            fail('Argument unkwown : ' . $arg);
+            fail('Unkwown argument: ' . $arg);
     }
 }
 

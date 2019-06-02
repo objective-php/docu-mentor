@@ -169,10 +169,11 @@ class DocuMentor
                                             );
                                             isset($tab) ?: $tab = 'Property | Type | Description | Example value' . "\n"
                                                 . '--- | --- | --- | ---' . "\n";
+
                                             $tab .= $propertyName . '|' .
                                                 $this->getPropertyType($docBlock) . '|' .
-                                                $docBlock->getSummary() . '<br/>' .
-                                                preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) .
+                                                $docBlock->getSummary() . '<br><br>' .
+                                                '*' . preg_replace("/\r|\n/", ' ', $docBlock->getDescription()->render()) . '*' .
                                                 '|<pre><code class="json">' .
                                                 json_encode($example, JSON_UNESCAPED_SLASHES) . "</code></pre>\n";
                                             $valuesExample[$propertyName] = $example;
@@ -187,10 +188,10 @@ class DocuMentor
                         }
                         $res .= $tab;
                         $res .= "\n```json  \n" .
-                            json_encode(
+                            str_replace('\\\\','\\', json_encode(
                                 [$directiveKey => $isMulti ? [$exempleIndex => $valuesExample] : $valuesExample],
                                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
-                            ) . "\n```\n";
+                            )) . "\n```\n";
                     }
                 } catch (\Exception $exception) {
                     $this->report[] = $exception;
